@@ -1,7 +1,7 @@
 package org.jetbrains.conf.bookify.books;
 
 import org.jetbrains.conf.bookify.events.BookAvailabilityCheckedEvent;
-import org.jetbrains.conf.bookify.events.BookBorrowedEvent;
+import org.jetbrains.conf.bookify.events.BookBorrowRequestEvent;
 import org.jetbrains.conf.bookify.events.BookReturnedEvent;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
@@ -126,8 +126,12 @@ public class BookService {
      */
     @TransactionalEventListener
     @Transactional(propagation = Propagation.REQUIRES_NEW)
-    public void handleBookBorrowedEvent(BookBorrowedEvent event) {
-        markBookAsBorrowed(event.bookId());
+    public void handleBookBorrowedEvent(BookBorrowRequestEvent event) {
+        Optional<Book> foundBook = bookRepository.findById(event.bookId());
+        if (foundBook.isPresent()) {
+            markBookAsBorrowed(event.bookId());
+        }
+        eventPublisher.publishEvent(new BookAvailabilityCheckedEvent(event.bookId(), event.borrowId(), foundBook.isPresent()));
     }
 
     /**
@@ -138,24 +142,5 @@ public class BookService {
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void handleBookReturnedEvent(BookReturnedEvent event) {
         markBookAsReturned(event.bookId());
-    }
-
-    /**
-     * Check if a book is available and publish an event with the result.
-     * If the book is available, it will be marked as borrowed.
-     * @param bookId the id of the book to check
-     * @param borrowingId the id of the borrowing request
-     */
-    @Transactional
-    public void checkBookAvailabilityAndUpdate(UUID bookId, UUID borrowingId) {
-        boolean isAvailable = isBookAvailable(bookId);
-
-        // If the book is available, mark it as borrowed
-        if (isAvailable) {
-            markBookAsBorrowed(bookId);
-        }
-
-        // Publish an event with the result
-        eventPublisher.publishEvent(new BookAvailabilityCheckedEvent(bookId, borrowingId, isAvailable));
     }
 }

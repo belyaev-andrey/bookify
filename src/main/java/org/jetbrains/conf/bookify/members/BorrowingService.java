@@ -2,6 +2,7 @@ package org.jetbrains.conf.bookify.members;
 
 import org.jetbrains.conf.bookify.books.BookService;
 import org.jetbrains.conf.bookify.events.BookAvailabilityCheckedEvent;
+import org.jetbrains.conf.bookify.events.BookBorrowRequestEvent;
 import org.jetbrains.conf.bookify.events.BookReturnedEvent;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
@@ -19,13 +20,11 @@ class BorrowingService {
 
     private final BorrowingRepository borrowingRepository;
     private final MemberService memberService;
-    private final BookService bookService;
     private final ApplicationEventPublisher eventPublisher;
 
-    BorrowingService(BorrowingRepository borrowingRepository, MemberService memberService, BookService bookService, ApplicationEventPublisher eventPublisher) {
+    BorrowingService(BorrowingRepository borrowingRepository, MemberService memberService, ApplicationEventPublisher eventPublisher) {
         this.borrowingRepository = borrowingRepository;
         this.memberService = memberService;
-        this.bookService = bookService;
         this.eventPublisher = eventPublisher;
     }
 
@@ -37,34 +36,19 @@ class BorrowingService {
      */
     @Transactional
     public Optional<Borrowing> borrowBook(UUID bookId, UUID memberId) {
-        // Step 1: A member requests to borrow a book (implicit in method call)
 
-        // Step 2: The Members module validates the member's eligibility
         if (!isMemberEligibleToBorrow(memberId)) {
             return Optional.empty();
         }
 
-        // Step 3: Create a pending borrowing request
         Borrowing borrowing = new Borrowing();
         borrowing.setMemberId(memberId);
-
-        // Check if the book exists
-        boolean bookExists = bookService.findById(bookId).isPresent();
-        if (bookExists) {
-            // If the book exists, set the bookId field
-            borrowing.setBookId(bookId);
-        } else {
-            // If the book doesn't exist, set the requestedBookId field
-            borrowing.setRequestedBookId(bookId);
-        }
-
+        borrowing.setRequestedBookId(bookId);
         borrowing.setBorrowDate(LocalDateTime.now());
         borrowing.setStatus(BorrowingStatus.PENDING);
         Borrowing savedBorrowing = borrowingRepository.save(borrowing);
 
-        // Step 4: Send a message to the book service to check availability
-        // This will always return false for non-existing books
-        bookService.checkBookAvailabilityAndUpdate(bookId, savedBorrowing.getId());
+        eventPublisher.publishEvent(new BookBorrowRequestEvent(bookId, savedBorrowing.getId()));
 
         return Optional.of(savedBorrowing);
     }
@@ -91,6 +75,7 @@ class BorrowingService {
         if (event.available()) {
             // Book is available, approve the request
             borrowing.setStatus(BorrowingStatus.APPROVED);
+            borrowing.setBookId(event.bookId());
 
             // No need to publish BookBorrowedEvent here as the book is already marked as borrowed in BookService
         } else {
