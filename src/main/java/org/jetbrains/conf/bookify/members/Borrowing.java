@@ -13,7 +13,7 @@ import java.util.UUID;
  * Represents a borrowing record of a book by a member.
  */
 @Table
-public class Borrowing implements Persistable<UUID> {
+class Borrowing implements Persistable<UUID> {
     @Id
     private UUID id;
     private UUID bookId;

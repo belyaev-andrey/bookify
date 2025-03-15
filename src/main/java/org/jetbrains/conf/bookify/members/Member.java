@@ -12,7 +12,7 @@ import java.util.UUID;
  * Represents a member of the Bookify service.
  */
 @Table
-public class Member implements Persistable<UUID> {
+class Member implements Persistable<UUID> {
     @Id
     private UUID id;
     private String name;
