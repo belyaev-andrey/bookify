@@ -5,7 +5,6 @@
  * including adding, removing, and searching for books.</p>
  */
 @org.springframework.modulith.ApplicationModule(
-        displayName = "Bookify Books",
-        allowedDependencies = {"events"}
+        displayName = "Bookify Books"
 )
 package org.jetbrains.conf.bookify.books;

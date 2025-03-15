@@ -1,5 +1,6 @@
 package org.jetbrains.conf.bookify.members;
 
+import org.jetbrains.conf.bookify.config.BookifySettingsConfig;
 import org.jetbrains.conf.bookify.events.BookAvailabilityCheckedEvent;
 import org.jetbrains.conf.bookify.events.BookBorrowRequestEvent;
 import org.jetbrains.conf.bookify.events.BookReturnedEvent;
@@ -20,11 +21,13 @@ class BorrowingService {
     private final BorrowingRepository borrowingRepository;
     private final MemberService memberService;
     private final ApplicationEventPublisher eventPublisher;
+    private final BookifySettingsConfig bookifySettingsConfig;
 
-    BorrowingService(BorrowingRepository borrowingRepository, MemberService memberService, ApplicationEventPublisher eventPublisher) {
+    BorrowingService(BorrowingRepository borrowingRepository, MemberService memberService, ApplicationEventPublisher eventPublisher, BookifySettingsConfig bookifySettingsConfig) {
         this.borrowingRepository = borrowingRepository;
         this.memberService = memberService;
         this.eventPublisher = eventPublisher;
+        this.bookifySettingsConfig = bookifySettingsConfig;
     }
 
     /**
@@ -43,7 +46,6 @@ class BorrowingService {
         Borrowing borrowing = new Borrowing();
         borrowing.setMemberId(memberId);
         borrowing.setRequestedBookId(bookId);
-        borrowing.setBorrowDate(LocalDateTime.now());
         borrowing.setStatus(BorrowingStatus.PENDING);
         Borrowing savedBorrowing = borrowingRepository.save(borrowing);
 
@@ -73,10 +75,9 @@ class BorrowingService {
 
         if (event.available()) {
             // Book is available, approve the request
+            borrowing.setBorrowDate(LocalDateTime.now());
             borrowing.setStatus(BorrowingStatus.APPROVED);
             borrowing.setBookId(event.bookId());
-
-            // No need to publish BookBorrowedEvent here as the book is already marked as borrowed in BookService
         } else {
             // Book is not available, reject the request
             borrowing.setStatus(BorrowingStatus.REJECTED);
@@ -161,13 +162,13 @@ class BorrowingService {
 
         // Check if the member has too many active borrowings (limit to 5)
         List<Borrowing> activeBorrowings = getActiveBorrowingsForMember(memberId);
-        if (activeBorrowings.size() >= 5) {
+        if (activeBorrowings.size() >= bookifySettingsConfig.getMaximumBooksBorrowed()) {
             return false;
         }
 
         // Check if the member has any overdue books
         // A book is considered overdue if it has been borrowed for more than 14 days
-        LocalDateTime twoWeeksAgo = LocalDateTime.now().minusDays(14);
+        LocalDateTime twoWeeksAgo = LocalDateTime.now().minusDays(bookifySettingsConfig.getOverdueDays());
         boolean hasOverdueBooks = activeBorrowings.stream()
                 .anyMatch(b -> b.getBorrowDate().isBefore(twoWeeksAgo));
         return !hasOverdueBooks;

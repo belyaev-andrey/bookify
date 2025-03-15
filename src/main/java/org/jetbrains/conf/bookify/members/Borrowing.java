@@ -28,7 +28,6 @@ class Borrowing implements Persistable<UUID> {
 
     Borrowing() {
         this.id = UUID.randomUUID();
-        this.borrowDate = LocalDateTime.now();
         this.status = BorrowingStatus.PENDING;
     }
 

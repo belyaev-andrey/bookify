@@ -5,7 +5,6 @@
  * including registration, profile management, and authentication.</p>
  */
 @org.springframework.modulith.ApplicationModule(
-    displayName = "Bookify Members",
-    allowedDependencies = {"events"}
+    displayName = "Bookify Members"
 )
 package org.jetbrains.conf.bookify.members;
