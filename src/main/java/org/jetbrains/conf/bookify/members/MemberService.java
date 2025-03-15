@@ -23,7 +23,7 @@ class MemberService {
      * @return the saved member
      */
     @Transactional
-    public Member addMember(Member member) {
+    Member addMember(Member member) {
         return memberRepository.save(member);
     }
 
@@ -33,7 +33,7 @@ class MemberService {
      * @return the updated member if found, empty otherwise
      */
     @Transactional
-    public Optional<Member> disableMember(UUID id) {
+    Optional<Member> disableMember(UUID id) {
         Optional<Member> memberOpt = memberRepository.findById(id);
         if (memberOpt.isPresent()) {
             Member member = memberOpt.get();
@@ -49,7 +49,7 @@ class MemberService {
      * @return a list of members matching the search criteria
      */
     @Transactional(readOnly = true)
-    public List<Member> searchMembersByName(String name) {
+    List<Member> searchMembersByName(String name) {
         return memberRepository.findByNameContainingIgnoreCase(name);
     }
 
@@ -59,7 +59,7 @@ class MemberService {
      * @return a list of members matching the search criteria
      */
     @Transactional(readOnly = true)
-    public List<Member> searchMembersByEmail(String email) {
+    List<Member> searchMembersByEmail(String email) {
         return memberRepository.findByEmailContainingIgnoreCase(email);
     }
 
@@ -68,7 +68,7 @@ class MemberService {
      * @return a list of all members
      */
     @Transactional(readOnly = true)
-    public List<Member> findAll() {
+    List<Member> findAll() {
         List<Member> members = new ArrayList<>();
         memberRepository.findAll().forEach(members::add);
         return members;
@@ -79,7 +79,7 @@ class MemberService {
      * @return a list of all active members
      */
     @Transactional(readOnly = true)
-    public List<Member> findAllActive() {
+    List<Member> findAllActive() {
         return memberRepository.findByEnabled(true);
     }
 
@@ -89,7 +89,7 @@ class MemberService {
      * @return the member, if found
      */
     @Transactional(readOnly = true)
-    public Optional<Member> findById(UUID id) {
+    Optional<Member> findById(UUID id) {
         return memberRepository.findById(id);
     }
 }

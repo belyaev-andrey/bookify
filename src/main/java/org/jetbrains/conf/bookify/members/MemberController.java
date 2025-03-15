@@ -23,7 +23,7 @@ class MemberController {
      * @return a list of all members
      */
     @GetMapping("")
-    public ResponseEntity<List<Member>> getAll() {
+    ResponseEntity<List<Member>> getAll() {
         List<Member> memberList = memberService.findAll();
         return new ResponseEntity<>(memberList, HttpStatus.OK);
     }
@@ -33,7 +33,7 @@ class MemberController {
      * @return a list of all active members
      */
     @GetMapping("/active")
-    public ResponseEntity<List<Member>> getAllActive() {
+    ResponseEntity<List<Member>> getAllActive() {
         List<Member> memberList = memberService.findAllActive();
         return new ResponseEntity<>(memberList, HttpStatus.OK);
     }
@@ -44,7 +44,7 @@ class MemberController {
      * @return the added member
      */
     @PostMapping("")
-    public ResponseEntity<Member> addMember(@RequestBody Member member) {
+    ResponseEntity<Member> addMember(@RequestBody Member member) {
         Member savedMember = memberService.addMember(member);
         return new ResponseEntity<>(savedMember, HttpStatus.CREATED);
     }
@@ -55,7 +55,7 @@ class MemberController {
      * @return the disabled member or 404 if not found
      */
     @PutMapping("/{id}/disable")
-    public ResponseEntity<Member> disableMember(@PathVariable UUID id) {
+    ResponseEntity<Member> disableMember(@PathVariable UUID id) {
         Optional<Member> disabledMember = memberService.disableMember(id);
         return disabledMember
                 .map(member -> new ResponseEntity<>(member, HttpStatus.OK))
@@ -68,7 +68,7 @@ class MemberController {
      * @return a list of members matching the search criteria
      */
     @GetMapping("/search")
-    public ResponseEntity<List<Member>> searchMembers(
+    ResponseEntity<List<Member>> searchMembers(
             @RequestParam(required = false) String name,
             @RequestParam(required = false) String email) {
         
@@ -90,7 +90,7 @@ class MemberController {
      * @return the member or 404 if not found
      */
     @GetMapping("/{id}")
-    public ResponseEntity<Member> getMemberById(@PathVariable UUID id) {
+    ResponseEntity<Member> getMemberById(@PathVariable UUID id) {
         Optional<Member> member = memberService.findById(id);
         return member
                 .map(m -> new ResponseEntity<>(m, HttpStatus.OK))

@@ -23,13 +23,13 @@ class Member implements Persistable<UUID> {
     @Transient
     private boolean isNew = true;
 
-    public Member() {
+    Member() {
         this.id = UUID.randomUUID();
         this.enabled = true;
     }
 
     @PersistenceCreator
-    public Member(UUID id, String name, String email, String password, boolean enabled) {
+    Member(UUID id, String name, String email, String password, boolean enabled) {
         this.id = id;
         this.name = name;
         this.email = email;

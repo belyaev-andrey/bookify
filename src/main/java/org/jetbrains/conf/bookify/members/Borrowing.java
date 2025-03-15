@@ -26,14 +26,14 @@ class Borrowing implements Persistable<UUID> {
     @Transient
     private boolean isNew = true;
 
-    public Borrowing() {
+    Borrowing() {
         this.id = UUID.randomUUID();
         this.borrowDate = LocalDateTime.now();
         this.status = BorrowingStatus.PENDING;
     }
 
     @PersistenceCreator
-    public Borrowing(UUID id, UUID bookId, UUID requestedBookId, UUID memberId, LocalDateTime borrowDate, LocalDateTime returnDate, BorrowingStatus status) {
+    Borrowing(UUID id, UUID bookId, UUID requestedBookId, UUID memberId, LocalDateTime borrowDate, LocalDateTime returnDate, BorrowingStatus status) {
         this.id = id;
         this.bookId = bookId;
         this.requestedBookId = requestedBookId;

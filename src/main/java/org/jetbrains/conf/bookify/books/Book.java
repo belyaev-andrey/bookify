@@ -20,13 +20,13 @@ class Book implements Persistable<UUID> {
     @Transient
     private boolean isNew = true;
 
-    public Book() {
+    Book() {
         this.id = UUID.randomUUID();
         this.available = true;
     }
 
     @PersistenceCreator
-    public Book(UUID id, String name, String isbn, boolean available) {
+    Book(UUID id, String name, String isbn, boolean available) {
         this.id = id;
         this.name = name;
         this.isbn = isbn;
@@ -35,7 +35,7 @@ class Book implements Persistable<UUID> {
     }
 
     // Constructor for backward compatibility
-    public Book(UUID id, String name, String isbn) {
+    Book(UUID id, String name, String isbn) {
         this(id, name, isbn, true);
     }
 

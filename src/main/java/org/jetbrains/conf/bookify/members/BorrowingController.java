@@ -12,7 +12,7 @@ class BorrowingController {
 
     private final BorrowingService borrowingService;
 
-    public BorrowingController(BorrowingService borrowingService) {
+    BorrowingController(BorrowingService borrowingService) {
         this.borrowingService = borrowingService;
     }
 
@@ -23,7 +23,7 @@ class BorrowingController {
      * @return the borrowing request if successful, 404 otherwise
      */
     @PostMapping("/borrow")
-    public ResponseEntity<Borrowing> borrowBook(@RequestParam UUID bookId, @RequestParam UUID memberId) {
+    ResponseEntity<Borrowing> borrowBook(@RequestParam UUID bookId, @RequestParam UUID memberId) {
         return borrowingService.borrowBook(bookId, memberId)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
@@ -35,7 +35,7 @@ class BorrowingController {
      * @return the borrowing request if found, 404 otherwise
      */
     @GetMapping("/{borrowingId}")
-    public ResponseEntity<Borrowing> getBorrowingById(@PathVariable UUID borrowingId) {
+    ResponseEntity<Borrowing> getBorrowingById(@PathVariable UUID borrowingId) {
         return borrowingService.getBorrowingById(borrowingId)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
@@ -49,7 +49,7 @@ class BorrowingController {
      * @return the updated borrowing record if successful, 404 otherwise
      */
     @PostMapping("/return")
-    public ResponseEntity<Borrowing> returnBook(@RequestParam UUID bookId, @RequestParam UUID memberId) {
+    ResponseEntity<Borrowing> returnBook(@RequestParam UUID bookId, @RequestParam UUID memberId) {
         return borrowingService.returnBook(bookId, memberId)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
@@ -61,7 +61,7 @@ class BorrowingController {
      * @return a list of borrowings for the member
      */
     @GetMapping("/member/{memberId}")
-    public List<Borrowing> getBorrowingsForMember(@PathVariable UUID memberId) {
+    List<Borrowing> getBorrowingsForMember(@PathVariable UUID memberId) {
         return borrowingService.getBorrowingsForMember(memberId);
     }
 
@@ -71,7 +71,7 @@ class BorrowingController {
      * @return a list of active borrowings for the member
      */
     @GetMapping("/member/{memberId}/active")
-    public List<Borrowing> getActiveBorrowingsForMember(@PathVariable UUID memberId) {
+    List<Borrowing> getActiveBorrowingsForMember(@PathVariable UUID memberId) {
         return borrowingService.getActiveBorrowingsForMember(memberId);
     }
 }

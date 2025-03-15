@@ -22,7 +22,7 @@ class BookController {
      * @return a list of all books
      */
     @GetMapping("")
-    public ResponseEntity<List<Book>> getAll() {
+    ResponseEntity<List<Book>> getAll() {
         List<Book> bookList = bookService.findAll();
         return new ResponseEntity<>(bookList, HttpStatus.OK);
     }
@@ -33,7 +33,7 @@ class BookController {
      * @return the added book
      */
     @PostMapping("")
-    public ResponseEntity<Book> addBook(@RequestBody Book book) {
+    ResponseEntity<Book> addBook(@RequestBody Book book) {
         Book savedBook = bookService.addBook(book);
         return new ResponseEntity<>(savedBook, HttpStatus.CREATED);
     }
@@ -44,7 +44,7 @@ class BookController {
      * @return no content
      */
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> removeBook(@PathVariable UUID id) {
+    ResponseEntity<Void> removeBook(@PathVariable UUID id) {
         bookService.removeBook(id);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
@@ -55,7 +55,7 @@ class BookController {
      * @return a list of books matching the search criteria
      */
     @GetMapping("/search")
-    public ResponseEntity<List<Book>> searchBooksByName(@RequestParam String name) {
+    ResponseEntity<List<Book>> searchBooksByName(@RequestParam String name) {
         List<Book> books = bookService.searchBooksByName(name);
         return new ResponseEntity<>(books, HttpStatus.OK);
     }

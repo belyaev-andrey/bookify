@@ -6,6 +6,6 @@
  */
 @org.springframework.modulith.ApplicationModule(
     displayName = "Bookify Members",
-    allowedDependencies = {"books", "events"}
+    allowedDependencies = {"events"}
 )
 package org.jetbrains.conf.bookify.members;

@@ -1,6 +1,5 @@
 package org.jetbrains.conf.bookify.members;
 
-import org.jetbrains.conf.bookify.books.BookService;
 import org.jetbrains.conf.bookify.events.BookAvailabilityCheckedEvent;
 import org.jetbrains.conf.bookify.events.BookBorrowRequestEvent;
 import org.jetbrains.conf.bookify.events.BookReturnedEvent;
@@ -35,7 +34,7 @@ class BorrowingService {
      * @return the borrowing request if successful, empty otherwise
      */
     @Transactional
-    public Optional<Borrowing> borrowBook(UUID bookId, UUID memberId) {
+    Optional<Borrowing> borrowBook(UUID bookId, UUID memberId) {
 
         if (!isMemberEligibleToBorrow(memberId)) {
             return Optional.empty();
@@ -59,7 +58,7 @@ class BorrowingService {
      */
     @TransactionalEventListener
     @Transactional(propagation = Propagation.REQUIRES_NEW)
-    public void handleBookAvailabilityCheckedEvent(BookAvailabilityCheckedEvent event) {
+    void handleBookAvailabilityCheckedEvent(BookAvailabilityCheckedEvent event) {
         Optional<Borrowing> borrowingOpt = borrowingRepository.findById(event.borrowingId());
         if (borrowingOpt.isEmpty()) {
             return;
@@ -92,7 +91,7 @@ class BorrowingService {
      * @return the borrowing request if found, empty otherwise
      */
     @Transactional(readOnly = true)
-    public Optional<Borrowing> getBorrowingById(UUID borrowingId) {
+    Optional<Borrowing> getBorrowingById(UUID borrowingId) {
         return borrowingRepository.findById(borrowingId);
     }
 
@@ -103,7 +102,7 @@ class BorrowingService {
      * @return the updated borrowing record if successful, empty otherwise
      */
     @Transactional
-    public Optional<Borrowing> returnBook(UUID bookId, UUID memberId) {
+    Optional<Borrowing> returnBook(UUID bookId, UUID memberId) {
         // Step 1: A member requests to return a book (implicit in method call)
 
         // Step 2: The Members module validates the borrowing record
@@ -133,7 +132,7 @@ class BorrowingService {
      * @return a list of borrowings for the member
      */
     @Transactional(readOnly = true)
-    public List<Borrowing> getBorrowingsForMember(UUID memberId) {
+    List<Borrowing> getBorrowingsForMember(UUID memberId) {
         return borrowingRepository.findByMemberId(memberId);
     }
 
@@ -143,7 +142,7 @@ class BorrowingService {
      * @return a list of active borrowings for the member
      */
     @Transactional(readOnly = true)
-    public List<Borrowing> getActiveBorrowingsForMember(UUID memberId) {
+    List<Borrowing> getActiveBorrowingsForMember(UUID memberId) {
         return borrowingRepository.findByMemberIdAndReturnDateIsNull(memberId);
     }
 
@@ -153,7 +152,7 @@ class BorrowingService {
      * @return true if the member is eligible, false otherwise
      */
     @Transactional(readOnly = true)
-    public boolean isMemberEligibleToBorrow(UUID memberId) {
+    boolean isMemberEligibleToBorrow(UUID memberId) {
         // Check if member exists and is active
         Optional<Member> memberOpt = memberService.findById(memberId);
         if (memberOpt.isEmpty() || !memberOpt.get().isEnabled()) {
@@ -171,10 +170,6 @@ class BorrowingService {
         LocalDateTime twoWeeksAgo = LocalDateTime.now().minusDays(14);
         boolean hasOverdueBooks = activeBorrowings.stream()
                 .anyMatch(b -> b.getBorrowDate().isBefore(twoWeeksAgo));
-        if (hasOverdueBooks) {
-            return false;
-        }
-
-        return true;
+        return !hasOverdueBooks;
     }
 }

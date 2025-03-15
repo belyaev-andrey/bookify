@@ -15,12 +15,12 @@ import java.util.Optional;
 import java.util.UUID;
 
 @Service
-public class BookService {
+class BookService {
 
     private final BookRepository bookRepository;
     private final ApplicationEventPublisher eventPublisher;
 
-    public BookService(BookRepository bookRepository, ApplicationEventPublisher eventPublisher) {
+    BookService(BookRepository bookRepository, ApplicationEventPublisher eventPublisher) {
         this.bookRepository = bookRepository;
         this.eventPublisher = eventPublisher;
     }
