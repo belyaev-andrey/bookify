@@ -9,11 +9,11 @@ import java.util.Optional;
 import java.util.UUID;
 
 @Service
-public class MemberService {
+class MemberService {
 
     private final MemberRepository memberRepository;
 
-    public MemberService(MemberRepository memberRepository) {
+    MemberService(MemberRepository memberRepository) {
         this.memberRepository = memberRepository;
     }
 

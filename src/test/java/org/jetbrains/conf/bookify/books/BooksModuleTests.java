@@ -17,7 +17,6 @@ class BooksModuleTests {
 
     @Test
     void verifyModuleStructure() {
-        // This test verifies that the books module follows the Spring Modulith structure rules
         ApplicationModules modules = ApplicationModules.of(BookifyApplication.class);
         modules.getModuleByName("books").orElseThrow();
     }
