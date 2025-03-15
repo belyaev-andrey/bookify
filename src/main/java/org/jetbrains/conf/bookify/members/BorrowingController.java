@@ -41,22 +41,6 @@ class BorrowingController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    /**
-     * Process a borrowing request.
-     * @param borrowingId the ID of the borrowing request to process
-     * @param bookId the ID of the book to borrow
-     * @param isAvailable whether the book is available
-     * @return the updated borrowing record if successful, 404 otherwise
-     */
-    @PostMapping("/{borrowingId}/process")
-    public ResponseEntity<Borrowing> processBorrowingRequest(
-            @PathVariable UUID borrowingId,
-            @RequestParam UUID bookId,
-            @RequestParam boolean isAvailable) {
-        return borrowingService.processBorrowingRequest(borrowingId, bookId, isAvailable)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
-    }
 
     /**
      * Return a borrowed book.

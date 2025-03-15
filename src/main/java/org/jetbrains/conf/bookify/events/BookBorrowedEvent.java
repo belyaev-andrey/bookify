@@ -5,20 +5,5 @@ import java.util.UUID;
 /**
  * Event published when a book is borrowed by a member.
  */
-public class BookBorrowedEvent {
-    private final UUID bookId;
-    private final UUID memberId;
-
-    public BookBorrowedEvent(UUID bookId, UUID memberId) {
-        this.bookId = bookId;
-        this.memberId = memberId;
-    }
-
-    public UUID getBookId() {
-        return bookId;
-    }
-
-    public UUID getMemberId() {
-        return memberId;
-    }
+public record BookBorrowedEvent(UUID bookId, UUID memberId) {
 }

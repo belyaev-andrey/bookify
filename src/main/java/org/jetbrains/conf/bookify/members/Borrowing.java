@@ -17,6 +17,7 @@ class Borrowing implements Persistable<UUID> {
     @Id
     private UUID id;
     private UUID bookId;
+    private UUID requestedBookId;
     private UUID memberId;
     private LocalDateTime borrowDate;
     private LocalDateTime returnDate;
@@ -32,9 +33,10 @@ class Borrowing implements Persistable<UUID> {
     }
 
     @PersistenceCreator
-    public Borrowing(UUID id, UUID bookId, UUID memberId, LocalDateTime borrowDate, LocalDateTime returnDate, BorrowingStatus status) {
+    public Borrowing(UUID id, UUID bookId, UUID requestedBookId, UUID memberId, LocalDateTime borrowDate, LocalDateTime returnDate, BorrowingStatus status) {
         this.id = id;
         this.bookId = bookId;
+        this.requestedBookId = requestedBookId;
         this.memberId = memberId;
         this.borrowDate = borrowDate;
         this.returnDate = returnDate;
@@ -62,6 +64,14 @@ class Borrowing implements Persistable<UUID> {
 
     public void setBookId(UUID bookId) {
         this.bookId = bookId;
+    }
+
+    public UUID getRequestedBookId() {
+        return requestedBookId;
+    }
+
+    public void setRequestedBookId(UUID requestedBookId) {
+        this.requestedBookId = requestedBookId;
     }
 
     public UUID getMemberId() {

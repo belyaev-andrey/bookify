@@ -55,21 +55,24 @@ class BorrowingControllerTest {
             assertThat(borrowings).isNotEmpty();
             UUID borrowingId = borrowings.get(0).getId();
 
-            // Verify the borrowing status is PENDING
+            // Verify the borrowing status is initially PENDING
             Borrowing borrowing = borrowingRepository.findById(borrowingId).orElseThrow();
-            assertThat(borrowing.getStatus()).isEqualTo(BorrowingStatus.PENDING);
+            assertThat(borrowing.getStatus()).isIn(BorrowingStatus.PENDING, BorrowingStatus.APPROVED);
 
-            // 3. Process the borrowing request (APPROVED)
-            var processRequestResult = mockMvc.post()
-                    .uri("/api/borrowings/" + borrowingId + "/process?bookId=" + TEST_BOOK_ID + "&isAvailable=true");
+            // Wait for the book availability check to complete and update the status
+            // Use polling with timeout instead of Thread.sleep
+            long startTime = System.currentTimeMillis();
+            long timeout = 5000; // 5 seconds timeout
+            BorrowingStatus status = BorrowingStatus.PENDING;
 
-            assertThat(processRequestResult)
-                    .hasStatus(HttpStatus.OK)
-                    .bodyJson();
+            while (status == BorrowingStatus.PENDING && System.currentTimeMillis() - startTime < timeout) {
+                Thread.sleep(100); // Small sleep to avoid hammering the database
+                borrowing = borrowingRepository.findById(borrowingId).orElseThrow();
+                status = borrowing.getStatus();
+            }
 
-            // Verify the borrowing status is now APPROVED
-            borrowing = borrowingRepository.findById(borrowingId).orElseThrow();
-            assertThat(borrowing.getStatus()).isEqualTo(BorrowingStatus.APPROVED);
+            // Verify the borrowing status is now APPROVED (assuming the book is available in the test database)
+            assertThat(status).isEqualTo(BorrowingStatus.APPROVED);
 
             // 4. Get the borrowing by ID
             var getBorrowingResult = mockMvc.get()
@@ -127,9 +130,12 @@ class BorrowingControllerTest {
         UUID memberId = savedMember.getId();
 
         try {
-            // 2. Create a borrowing request (PENDING)
+            // Use a non-existent book ID to simulate a book that is not available
+            UUID nonExistentBookId = UUID.randomUUID();
+
+            // 2. Create a borrowing request for a non-existent book
             var borrowRequestResult = mockMvc.post()
-                    .uri("/api/borrowings/borrow?bookId=" + TEST_BOOK_ID + "&memberId=" + memberId);
+                    .uri("/api/borrowings/borrow?bookId=" + nonExistentBookId + "&memberId=" + memberId);
 
             assertThat(borrowRequestResult)
                     .hasStatus(HttpStatus.OK)
@@ -138,23 +144,29 @@ class BorrowingControllerTest {
             // Get the borrowing ID from the repository
             List<Borrowing> borrowings = borrowingRepository.findByMemberId(memberId);
             assertThat(borrowings).isNotEmpty();
-            UUID borrowingId = borrowings.getFirst().getId();
+            UUID borrowingId = borrowings.get(0).getId();
 
-            // Verify the borrowing status is PENDING
             Borrowing borrowing = borrowingRepository.findById(borrowingId).orElseThrow();
-            assertThat(borrowing.getStatus()).isEqualTo(BorrowingStatus.PENDING);
+            assertThat(borrowing.getStatus()).isIn(BorrowingStatus.REJECTED, BorrowingStatus.PENDING);
 
-            // 3. Process the borrowing request (REJECTED)
-            var processRequestResult = mockMvc.post()
-                    .uri("/api/borrowings/" + borrowingId + "/process?bookId=" + TEST_BOOK_ID + "&isAvailable=false");
+            // Wait for the book availability check to complete and update the status
+            // Use polling with timeout instead of Thread.sleep
+            long startTime = System.currentTimeMillis();
+            long timeout = 5000; // 5 seconds timeout
+            BorrowingStatus status = BorrowingStatus.PENDING;
 
-            assertThat(processRequestResult)
-                    .hasStatus(HttpStatus.OK)
-                    .bodyJson();
+            while (status == BorrowingStatus.PENDING && System.currentTimeMillis() - startTime < timeout) {
+                Thread.sleep(100); // Small sleep to avoid hammering the database
+                borrowing = borrowingRepository.findById(borrowingId).orElseThrow();
+                status = borrowing.getStatus();
+            }
 
-            // Verify the borrowing status is now REJECTED
-            borrowing = borrowingRepository.findById(borrowingId).orElseThrow();
-            assertThat(borrowing.getStatus()).isEqualTo(BorrowingStatus.REJECTED);
+            // Verify the borrowing status is now REJECTED (since the book doesn't exist)
+            assertThat(status).isEqualTo(BorrowingStatus.REJECTED);
+
+            // Verify that the requestedBookId field is set to the non-existent book ID and the bookId field is null
+            assertThat(borrowing.getRequestedBookId()).isEqualTo(nonExistentBookId);
+            assertThat(borrowing.getBookId()).isNull();
         } finally {
             // Clean up
             List<Borrowing> borrowings = borrowingRepository.findByMemberId(memberId);
