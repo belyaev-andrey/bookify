@@ -17,21 +17,19 @@ class BorrowingService {
 
     private final BorrowingRepository borrowingRepository;
     private final MemberService memberService;
-    private final BookService bookService;
     private final ApplicationEventPublisher eventPublisher;
 
-    BorrowingService(BorrowingRepository borrowingRepository, MemberService memberService, BookService bookService, ApplicationEventPublisher eventPublisher) {
+    BorrowingService(BorrowingRepository borrowingRepository, MemberService memberService, ApplicationEventPublisher eventPublisher) {
         this.borrowingRepository = borrowingRepository;
         this.memberService = memberService;
-        this.bookService = bookService;
         this.eventPublisher = eventPublisher;
     }
 
     /**
-     * Borrow a book for a member.
+     * Create a borrowing request for a member.
      * @param bookId the ID of the book to borrow
      * @param memberId the ID of the member borrowing the book
-     * @return the borrowing record if successful, empty otherwise
+     * @return the borrowing request if successful, empty otherwise
      */
     @Transactional
     public Optional<Borrowing> borrowBook(UUID bookId, UUID memberId) {
@@ -42,22 +40,60 @@ class BorrowingService {
             return Optional.empty();
         }
 
-        // Step 3: The Books module checks the book's availability
-        if (!bookService.isBookAvailable(bookId)) {
+        // Step 3: Create a pending borrowing request
+        Borrowing borrowing = new Borrowing();
+        borrowing.setMemberId(memberId);
+        borrowing.setBorrowDate(LocalDateTime.now());
+        borrowing.setStatus(BorrowingStatus.PENDING);
+        Borrowing savedBorrowing = borrowingRepository.save(borrowing);
+
+        return Optional.of(savedBorrowing);
+    }
+
+    /**
+     * Process a borrowing request.
+     * @param borrowingId the ID of the borrowing request to process
+     * @param bookId the ID of the book to borrow
+     * @param isAvailable whether the book is available
+     * @return the updated borrowing record if successful, empty otherwise
+     */
+    @Transactional
+    public Optional<Borrowing> processBorrowingRequest(UUID borrowingId, UUID bookId, boolean isAvailable) {
+        Optional<Borrowing> borrowingOpt = borrowingRepository.findById(borrowingId);
+        if (borrowingOpt.isEmpty()) {
             return Optional.empty();
         }
 
-        // Step 4: The Members module updates the member's borrowing history
-        Borrowing borrowing = new Borrowing();
-        borrowing.setBookId(bookId);
-        borrowing.setMemberId(memberId);
-        borrowing.setBorrowDate(LocalDateTime.now());
-        Borrowing savedBorrowing = borrowingRepository.save(borrowing);
+        Borrowing borrowing = borrowingOpt.get();
 
-        // Step 5: The Books module updates the book's availability (via event)
-        eventPublisher.publishEvent(new BookBorrowedEvent(bookId, memberId));
+        // Check if the borrowing is still pending
+        if (borrowing.getStatus() != BorrowingStatus.PENDING) {
+            return Optional.empty();
+        }
 
-        return Optional.of(savedBorrowing);
+        if (isAvailable) {
+            // Book is available, approve the request
+            borrowing.setBookId(bookId);
+            borrowing.setStatus(BorrowingStatus.APPROVED);
+
+            // Publish event to update book availability
+            eventPublisher.publishEvent(new BookBorrowedEvent(bookId, borrowing.getMemberId()));
+        } else {
+            // Book is not available, reject the request
+            borrowing.setStatus(BorrowingStatus.REJECTED);
+        }
+
+        return Optional.of(borrowingRepository.save(borrowing));
+    }
+
+    /**
+     * Get a borrowing request by ID.
+     * @param borrowingId the ID of the borrowing request
+     * @return the borrowing request if found, empty otherwise
+     */
+    @Transactional(readOnly = true)
+    public Optional<Borrowing> getBorrowingById(UUID borrowingId) {
+        return borrowingRepository.findById(borrowingId);
     }
 
     /**

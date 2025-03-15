@@ -45,7 +45,7 @@ class BookControllerTest {
     @Test
     void testRemoveBook() throws Exception {
         // Remove a book (using a UUID from initial data)
-        var removeBookResult = mockMvc.delete().uri("/api/books/a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11");
+        var removeBookResult = mockMvc.delete().uri("/api/books/a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a12");
         assertThat(removeBookResult).hasStatus(HttpStatus.NO_CONTENT);
     }
 

@@ -20,6 +20,7 @@ class Borrowing implements Persistable<UUID> {
     private UUID memberId;
     private LocalDateTime borrowDate;
     private LocalDateTime returnDate;
+    private BorrowingStatus status;
 
     @Transient
     private boolean isNew = true;
@@ -27,15 +28,17 @@ class Borrowing implements Persistable<UUID> {
     public Borrowing() {
         this.id = UUID.randomUUID();
         this.borrowDate = LocalDateTime.now();
+        this.status = BorrowingStatus.PENDING;
     }
 
     @PersistenceCreator
-    public Borrowing(UUID id, UUID bookId, UUID memberId, LocalDateTime borrowDate, LocalDateTime returnDate) {
+    public Borrowing(UUID id, UUID bookId, UUID memberId, LocalDateTime borrowDate, LocalDateTime returnDate, BorrowingStatus status) {
         this.id = id;
         this.bookId = bookId;
         this.memberId = memberId;
         this.borrowDate = borrowDate;
         this.returnDate = returnDate;
+        this.status = status;
         this.isNew = false;
     }
 
@@ -91,5 +94,21 @@ class Borrowing implements Persistable<UUID> {
      */
     public boolean isReturned() {
         return returnDate != null;
+    }
+
+    /**
+     * Gets the status of the borrowing request.
+     * @return the status of the borrowing request
+     */
+    public BorrowingStatus getStatus() {
+        return status;
+    }
+
+    /**
+     * Sets the status of the borrowing request.
+     * @param status the status to set
+     */
+    public void setStatus(BorrowingStatus status) {
+        this.status = status;
     }
 }
