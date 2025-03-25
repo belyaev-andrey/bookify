@@ -10,8 +10,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.assertj.MockMvcTester;
 
-import java.util.UUID;
-
 import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest

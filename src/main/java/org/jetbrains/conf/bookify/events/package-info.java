@@ -5,8 +5,7 @@
  * including adding, removing, and searching for books.</p>
  */
 @org.springframework.modulith.ApplicationModule(
-        displayName = "Bookify Events",
-        type = ApplicationModule.Type.OPEN
+        displayName = "Bookify Events"
 )
 package org.jetbrains.conf.bookify.events;
 

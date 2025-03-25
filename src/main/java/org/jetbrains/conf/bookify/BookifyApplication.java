@@ -6,7 +6,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.modulith.Modulithic;
 
-@Modulithic(sharedModules = {"config", "events"})
+@Modulithic
 @SpringBootApplication
 @EnableConfigurationProperties({BookifySettingsConfig.class})
 public class BookifyApplication {
