@@ -1,6 +1,4 @@
 @org.springframework.modulith.ApplicationModule(
-        type = ApplicationModule.Type.OPEN
+        displayName = "Application Configuration"
 )
 package org.jetbrains.conf.bookify.config;
-
-import org.springframework.modulith.ApplicationModule;

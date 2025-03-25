@@ -8,5 +8,3 @@
         displayName = "Bookify Events"
 )
 package org.jetbrains.conf.bookify.events;
-
-import org.springframework.modulith.ApplicationModule;
