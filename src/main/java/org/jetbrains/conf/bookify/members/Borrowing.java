@@ -1,10 +1,12 @@
 package org.jetbrains.conf.bookify.members;
 
-import org.springframework.data.annotation.Id;
-import org.springframework.data.annotation.PersistenceCreator;
-import org.springframework.data.annotation.Transient;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.EnumType;
 import org.springframework.data.domain.Persistable;
-import org.springframework.data.relational.core.mapping.Table;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -12,7 +14,8 @@ import java.util.UUID;
 /**
  * Represents a borrowing record of a book by a member.
  */
-@Table
+@Entity
+@Table(name = "borrowing")
 class Borrowing implements Persistable<UUID> {
     @Id
     private UUID id;
@@ -21,17 +24,18 @@ class Borrowing implements Persistable<UUID> {
     private UUID memberId;
     private LocalDateTime borrowDate;
     private LocalDateTime returnDate;
+
+    @Enumerated(EnumType.STRING)
     private BorrowingStatus status;
 
     @Transient
     private boolean isNew = true;
 
-    Borrowing() {
+    protected Borrowing() {
         this.id = UUID.randomUUID();
         this.status = BorrowingStatus.PENDING;
     }
 
-    @PersistenceCreator
     Borrowing(UUID id, UUID bookId, UUID requestedBookId, UUID memberId, LocalDateTime borrowDate, LocalDateTime returnDate, BorrowingStatus status) {
         this.id = id;
         this.bookId = bookId;

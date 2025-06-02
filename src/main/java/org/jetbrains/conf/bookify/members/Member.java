@@ -1,17 +1,18 @@
 package org.jetbrains.conf.bookify.members;
 
-import org.springframework.data.annotation.Id;
-import org.springframework.data.annotation.PersistenceCreator;
-import org.springframework.data.annotation.Transient;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
 import org.springframework.data.domain.Persistable;
-import org.springframework.data.relational.core.mapping.Table;
 
 import java.util.UUID;
 
 /**
  * Represents a member of the Bookify service.
  */
-@Table
+@Entity
+@Table(name = "member")
 class Member implements Persistable<UUID> {
     @Id
     private UUID id;
@@ -23,12 +24,11 @@ class Member implements Persistable<UUID> {
     @Transient
     private boolean isNew = true;
 
-    Member() {
+    protected Member() {
         this.id = UUID.randomUUID();
         this.enabled = true;
     }
 
-    @PersistenceCreator
     Member(UUID id, String name, String email, String password, boolean enabled) {
         this.id = id;
         this.name = name;

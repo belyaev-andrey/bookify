@@ -1,14 +1,15 @@
 package org.jetbrains.conf.bookify.books;
 
-import org.springframework.data.annotation.Id;
-import org.springframework.data.annotation.PersistenceCreator;
-import org.springframework.data.annotation.Transient;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
 import org.springframework.data.domain.Persistable;
-import org.springframework.data.relational.core.mapping.Table;
 
 import java.util.UUID;
 
-@Table
+@Entity
+@Table(name = "book")
 class Book implements Persistable<UUID> {
 
     @Id
@@ -20,12 +21,11 @@ class Book implements Persistable<UUID> {
     @Transient
     private boolean isNew = true;
 
-    Book() {
+    protected Book() {
         this.id = UUID.randomUUID();
         this.available = true;
     }
 
-    @PersistenceCreator
     Book(UUID id, String name, String isbn, boolean available) {
         this.id = id;
         this.name = name;
