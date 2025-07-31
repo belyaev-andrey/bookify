@@ -4,6 +4,27 @@ This project demonstrates the use of Spring Modulith to create a modular applica
 
 ## Application Architecture
 
+### Spring Data Repositories AOT implementation
+
+To run the application with AOT enabled, do the following:
+* In the `spring.properties` file set `spring.aot.enabled=false`
+* Build the application
+```shell
+./mvnw clean verify
+```
+* Set `spring.aot.enabled` to `true`
+* Run the application
+```shell
+set SPRING_PROFILES_ACTIVE=aot
+./mvnw spring-boot:run     
+```
+The application should display in the console:
+```shell
+Starting AOT-processed BookifyApplication using Java 26...
+```
+⚠️ Spring Boot Docker Compose integration DOES NOT WORK in AOT mode
+
+
 ### Modules
 
 The application is organized into the following modules:
@@ -100,6 +121,7 @@ services:
     ports:
       - '5432'
 ```
+Spring Boot Docker Compose integration DOES NOT WORK in AOT mode
 
 ## Testing with Spring Modulith
 
