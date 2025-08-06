@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.UUID;
 
 interface BorrowingRepository extends CrudRepository<Borrowing, UUID> {
+
     /**
      * Find all borrowings for a specific member.
      * @param memberId the ID of the member
