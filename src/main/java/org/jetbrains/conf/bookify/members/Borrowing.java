@@ -1,9 +1,12 @@
 package org.jetbrains.conf.bookify.members;
 
+import org.jetbrains.conf.bookify.books.Book;
+import org.jspecify.annotations.NonNull;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.PersistenceCreator;
 import org.springframework.data.annotation.Transient;
 import org.springframework.data.domain.Persistable;
+import org.springframework.data.jdbc.core.mapping.AggregateReference;
 import org.springframework.data.relational.core.mapping.Table;
 
 import java.time.LocalDateTime;
@@ -16,9 +19,9 @@ import java.util.UUID;
 class Borrowing implements Persistable<UUID> {
     @Id
     private UUID id;
-    private UUID bookId;
+    private AggregateReference<Book,UUID> bookId;
     private UUID requestedBookId;
-    private UUID memberId;
+    private AggregateReference<Member, UUID> memberId;
     private LocalDateTime borrowDate;
     private LocalDateTime returnDate;
     private BorrowingStatus status;
@@ -32,11 +35,11 @@ class Borrowing implements Persistable<UUID> {
     }
 
     @PersistenceCreator
-    Borrowing(UUID id, UUID bookId, UUID requestedBookId, UUID memberId, LocalDateTime borrowDate, LocalDateTime returnDate, BorrowingStatus status) {
+    Borrowing(@NonNull UUID id, UUID bookId, @NonNull UUID requestedBookId, @NonNull UUID memberId, LocalDateTime borrowDate, LocalDateTime returnDate, @NonNull BorrowingStatus status) {
         this.id = id;
-        this.bookId = bookId;
+        this.bookId = bookId == null ? null : AggregateReference.to(bookId);
         this.requestedBookId = requestedBookId;
-        this.memberId = memberId;
+        this.memberId = AggregateReference.to(memberId);
         this.borrowDate = borrowDate;
         this.returnDate = returnDate;
         this.status = status;
@@ -58,11 +61,11 @@ class Borrowing implements Persistable<UUID> {
     }
 
     public UUID getBookId() {
-        return bookId;
+        return bookId.getId();
     }
 
     public void setBookId(UUID bookId) {
-        this.bookId = bookId;
+        this.bookId = bookId == null ? null : AggregateReference.to(bookId);
     }
 
     public UUID getRequestedBookId() {
@@ -74,11 +77,11 @@ class Borrowing implements Persistable<UUID> {
     }
 
     public UUID getMemberId() {
-        return memberId;
+        return memberId.getId();
     }
 
     public void setMemberId(UUID memberId) {
-        this.memberId = memberId;
+        this.memberId = AggregateReference.to(memberId);
     }
 
     public LocalDateTime getBorrowDate() {

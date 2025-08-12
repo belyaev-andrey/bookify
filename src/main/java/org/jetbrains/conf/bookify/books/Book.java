@@ -9,7 +9,7 @@ import org.springframework.data.relational.core.mapping.Table;
 import java.util.UUID;
 
 @Table
-class Book implements Persistable<UUID> {
+public class Book implements Persistable<UUID> {
 
     @Id
     private UUID id;
