@@ -7,4 +7,7 @@
 @org.springframework.modulith.ApplicationModule(
         displayName = "Bookify Events"
 )
+@NullMarked
 package org.jetbrains.conf.bookify.events;
+
+import org.jspecify.annotations.NullMarked;

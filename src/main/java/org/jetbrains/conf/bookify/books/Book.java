@@ -1,5 +1,6 @@
 package org.jetbrains.conf.bookify.books;
 
+import org.jspecify.annotations.Nullable;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.PersistenceCreator;
 import org.springframework.data.annotation.Transient;
@@ -12,31 +13,21 @@ import java.util.UUID;
 public class Book implements Persistable<UUID> {
 
     @Id
-    private UUID id;
+    @Nullable private UUID id;
     private String name;
     private String isbn;
     private boolean available;
 
     @Transient
-    private boolean isNew = true;
-
-    Book() {
-        this.id = UUID.randomUUID();
-        this.available = true;
-    }
+    private boolean isNew;
 
     @PersistenceCreator
-    Book(UUID id, String name, String isbn, boolean available) {
-        this.id = id;
+    Book(@Nullable UUID id, String name, String isbn, boolean available) {
+        this.id = id == null ? UUID.randomUUID() : id;
         this.name = name;
         this.isbn = isbn;
         this.available = available;
-        this.isNew = false;
-    }
-
-    // Constructor for backward compatibility
-    Book(UUID id, String name, String isbn) {
-        this(id, name, isbn, true);
+        this.isNew = id == null;
     }
 
     @Override
@@ -44,7 +35,7 @@ public class Book implements Persistable<UUID> {
         return isNew;
     }
 
-    public UUID getId() {
+    public @Nullable UUID getId() {
         return id;
     }
 

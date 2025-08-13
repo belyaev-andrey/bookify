@@ -1,6 +1,5 @@
 package org.jetbrains.conf.bookify.members;
 
-import org.jspecify.annotations.NonNull;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 

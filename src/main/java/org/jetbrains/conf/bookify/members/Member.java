@@ -1,9 +1,11 @@
 package org.jetbrains.conf.bookify.members;
 
+import org.jspecify.annotations.Nullable;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.PersistenceCreator;
 import org.springframework.data.annotation.Transient;
 import org.springframework.data.domain.Persistable;
+import org.springframework.data.relational.core.mapping.Column;
 import org.springframework.data.relational.core.mapping.Table;
 
 import java.util.UUID;
@@ -11,13 +13,20 @@ import java.util.UUID;
 /**
  * Represents a member of the Bookify service.
  */
-@Table
+@Table("member")
 class Member implements Persistable<UUID> {
     @Id
     private UUID id;
+    @Column("name")
+    @Nullable
     private String name;
+    @Column("email")
+    @Nullable
     private String email;
+    @Column("password")
+    @Nullable
     private String password;
+    @Column("enabled")
     private boolean enabled;
 
     @Transient
@@ -52,7 +61,7 @@ class Member implements Persistable<UUID> {
         this.id = id;
     }
 
-    public String getName() {
+    public @Nullable String getName() {
         return name;
     }
 
@@ -60,7 +69,7 @@ class Member implements Persistable<UUID> {
         this.name = name;
     }
 
-    public String getEmail() {
+    public @Nullable String getEmail() {
         return email;
     }
 
@@ -68,7 +77,7 @@ class Member implements Persistable<UUID> {
         this.email = email;
     }
 
-    public String getPassword() {
+    public @Nullable String getPassword() {
         return password;
     }
 

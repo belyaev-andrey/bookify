@@ -3,6 +3,7 @@ package org.jetbrains.conf.bookify.books;
 import org.jetbrains.conf.bookify.events.BookAvailabilityCheckedEvent;
 import org.jetbrains.conf.bookify.events.BookBorrowRequestEvent;
 import org.jetbrains.conf.bookify.events.BookReturnedEvent;
+import org.jspecify.annotations.Nullable;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -31,7 +32,7 @@ class BookService {
      * @return the saved book
      */
     @Transactional
-    Book addBook(Book book) {
+    Book saveBook(Book book) {
         return bookRepository.save(book);
     }
 
@@ -98,6 +99,11 @@ class BookService {
         return Optional.empty();
     }
 
+    @Transactional(readOnly = true)
+    public Optional<Book> findById(@Nullable UUID id) {
+        return bookRepository.findById(id);
+    }
+
     /**
      * Event listener for when a book is borrowed.
      * @param event the book borrowed event
@@ -118,4 +124,5 @@ class BookService {
     void handleBookReturnedEvent(BookReturnedEvent event) {
         markBookAsReturned(event.bookId());
     }
+
 }

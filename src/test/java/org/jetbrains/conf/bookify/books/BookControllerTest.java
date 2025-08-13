@@ -28,6 +28,21 @@ class BookControllerTest {
                 .bodyJson();
     }
 
+    @Test
+    void testFetchExistingById() throws Exception {
+        var booksRequestResult = mockMvc.get().uri("/api/books/a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a14");
+        assertThat(booksRequestResult)
+                .hasStatus(HttpStatus.OK)
+                .bodyJson();
+    }
+
+    @Test
+    void testFetchNonExistingById() throws Exception {
+        var booksRequestResult = mockMvc.get().uri("/api/books/00000000-0000-0000-0000-000000000000");
+        assertThat(booksRequestResult)
+                .hasStatus(HttpStatus.NOT_FOUND);
+    }
+
      @Test
      void testAddBook() throws Exception {
          // Add a book
@@ -41,9 +56,41 @@ class BookControllerTest {
      }
 
     @Test
+    void testUpdateExistingBook() throws Exception {
+        // Update a book
+        var updateBookResult = mockMvc.put()
+                .uri("/api/books")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"id\":\"a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11\",\"name\":\"Test Book\",\"isbn\":\"1234567890\"}");
+
+        assertThat(updateBookResult)
+                .hasStatus(HttpStatus.OK);
+
+        var booksRequestResult = mockMvc.get().uri("/api/books/a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11");
+        assertThat(booksRequestResult)
+                .hasStatus(HttpStatus.OK)
+                .bodyJson().convertTo(Book.class).extracting("name")
+                .isEqualTo("Test Book");
+    }
+
+
+    @Test
+    void testUpdateNonExistingBook() throws Exception {
+        // Update a book
+        var updateBookResult = mockMvc.put()
+                .uri("/api/books")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"id\":\"00000000-0000-0000-0000-000000000000\",\"name\":\"Test Book\",\"isbn\":\"1234567890\"}");
+
+        assertThat(updateBookResult)
+                .hasStatus(HttpStatus.NOT_FOUND);
+    }
+
+
+    @Test
     void testRemoveBook() throws Exception {
         // Remove a book (using a UUID from initial data)
-        var removeBookResult = mockMvc.delete().uri("/api/books/a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a12");
+        var removeBookResult = mockMvc.delete().uri("/api/books/a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11");
         assertThat(removeBookResult).hasStatus(HttpStatus.NO_CONTENT);
     }
 

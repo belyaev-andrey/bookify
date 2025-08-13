@@ -25,9 +25,7 @@ class BooksModuleTests {
     void shouldAddBook() {
         // This test verifies that the books module can add a book
         // It's a placeholder for a more comprehensive test
-        Book book = new Book();
-        book.setName("Test Book");
-        book.setIsbn("1234567890");
-        bookService.addBook(book);
+        Book book = new Book(null, "Test Book", "1234567890", true);
+        bookService.saveBook(book);
     }
 }

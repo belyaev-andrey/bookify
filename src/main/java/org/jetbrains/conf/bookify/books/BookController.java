@@ -19,6 +19,7 @@ class BookController {
 
     /**
      * Get all books in the catalogue
+     *
      * @return a list of all books
      */
     @GetMapping("")
@@ -29,17 +30,26 @@ class BookController {
 
     /**
      * Add a book to the catalogue
+     *
      * @param book the book to add
      * @return the added book
      */
     @PostMapping("")
     ResponseEntity<Book> addBook(@RequestBody Book book) {
-        Book savedBook = bookService.addBook(book);
+        Book savedBook = bookService.saveBook(book);
         return new ResponseEntity<>(savedBook, HttpStatus.CREATED);
+    }
+
+    @PutMapping("")
+    public ResponseEntity<Book> updateBook(@RequestBody Book book) {
+        return bookService.findById(book.getId())
+                .map(b -> ResponseEntity.ok(bookService.saveBook(book)))
+                .orElse(ResponseEntity.notFound().build());
     }
 
     /**
      * Remove a book from the catalogue
+     *
      * @param id the id of the book to remove
      * @return no content
      */
@@ -49,8 +59,16 @@ class BookController {
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
+    @GetMapping("/{id}")
+    public ResponseEntity<Book> findById(@PathVariable UUID id) {
+        return bookService.findById(id)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
+
     /**
      * Search for books by name
+     *
      * @param name the name to search for
      * @return a list of books matching the search criteria
      */
