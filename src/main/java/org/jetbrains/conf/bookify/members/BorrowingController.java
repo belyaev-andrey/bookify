@@ -1,5 +1,6 @@
 package org.jetbrains.conf.bookify.members;
 
+import org.jspecify.annotations.NonNull;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -16,6 +17,16 @@ class BorrowingController {
         this.borrowingService = borrowingService;
     }
 
+    /**
+     * Retrieves a list of all borrowing records.
+     *
+     * @return a ResponseEntity containing a list of all borrowings
+     */
+    @GetMapping("")
+    public ResponseEntity<List<Borrowing>> getAll() {
+        return ResponseEntity.ok(borrowingService.findAll());
+    }
+    
     /**
      * Create a borrowing request for a member.
      * @param bookId the ID of the book to borrow

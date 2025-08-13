@@ -31,6 +31,8 @@ class BorrowingControllerTest {
     // Test UUID for a book that exists in the initial data
     private static final UUID TEST_BOOK_ID = UUID.fromString("a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11");
 
+
+
     @Test
     void testBorrowingWorkflow() throws Exception {
         // 1. Create a test member
@@ -175,6 +177,17 @@ class BorrowingControllerTest {
             }
             memberRepository.deleteById(memberId);
         }
+    }
+
+    @Test
+    void testGetAllBorrowings() throws Exception {
+        // Test the GET /api/borrowings endpoint
+        var getAllBorrowingsResult = mockMvc.get()
+                .uri("/api/borrowings");
+
+        assertThat(getAllBorrowingsResult)
+                .hasStatus(HttpStatus.OK)
+                .bodyJson().hasPath("");
     }
 
     @Test

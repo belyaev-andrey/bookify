@@ -11,6 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.event.TransactionalEventListener;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -172,5 +173,12 @@ class BorrowingService {
         boolean hasOverdueBooks = activeBorrowings.stream()
                 .anyMatch(b -> b.getBorrowDate().isBefore(twoWeeksAgo));
         return !hasOverdueBooks;
+    }
+
+    @Transactional(readOnly = true)
+    public List<Borrowing> findAll() {
+        List<Borrowing> all = new ArrayList<>();
+        borrowingRepository.findAll().forEach(all::add);
+        return all;
     }
 }
