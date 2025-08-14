@@ -17,5 +17,7 @@ enum BorrowingStatus {
     /**
      * The borrowing request has been rejected.
      */
-    REJECTED
+    REJECTED,
+
+    RETURNED
 }

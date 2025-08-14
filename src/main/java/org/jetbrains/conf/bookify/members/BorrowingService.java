@@ -5,10 +5,9 @@ import org.jetbrains.conf.bookify.events.BookAvailabilityCheckedEvent;
 import org.jetbrains.conf.bookify.events.BookBorrowRequestEvent;
 import org.jetbrains.conf.bookify.events.BookReturnedEvent;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.modulith.events.ApplicationModuleListener;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.transaction.event.TransactionalEventListener;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -44,10 +43,7 @@ class BorrowingService {
             return Optional.empty();
         }
 
-        Borrowing borrowing = new Borrowing();
-        borrowing.setMemberId(memberId);
-        borrowing.setRequestedBookId(bookId);
-        borrowing.setStatus(BorrowingStatus.PENDING);
+        Borrowing borrowing = new Borrowing(null, null, bookId, memberId, null, null, BorrowingStatus.PENDING);
         Borrowing savedBorrowing = borrowingRepository.save(borrowing);
 
         eventPublisher.publishEvent(new BookBorrowRequestEvent(bookId, savedBorrowing.getId()));
@@ -59,8 +55,7 @@ class BorrowingService {
      * Event listener for when a book's availability is checked.
      * @param event the book availability checked event
      */
-    @TransactionalEventListener
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    @ApplicationModuleListener
     void handleBookAvailabilityCheckedEvent(BookAvailabilityCheckedEvent event) {
         Optional<Borrowing> borrowingOpt = borrowingRepository.findById(event.borrowingId());
         if (borrowingOpt.isEmpty()) {
@@ -120,6 +115,7 @@ class BorrowingService {
         // Step 3: The Members module updates the member's borrowing history
         Borrowing borrowing = borrowingOpt.get();
         borrowing.setReturnDate(LocalDateTime.now());
+        borrowing.setStatus(BorrowingStatus.RETURNED);
         Borrowing savedBorrowing = borrowingRepository.save(borrowing);
 
         // Step 4: The Books module updates the book's availability (via event)

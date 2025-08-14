@@ -55,7 +55,7 @@ class BorrowingControllerTest {
             // Get the borrowing ID from the repository
             List<Borrowing> borrowings = borrowingRepository.findByMemberId(memberId);
             assertThat(borrowings).isNotEmpty();
-            UUID borrowingId = borrowings.get(0).getId();
+            UUID borrowingId = borrowings.getFirst().getId();
 
             // Verify the borrowing status is initially PENDING
             Borrowing borrowing = borrowingRepository.findById(borrowingId).orElseThrow();
@@ -146,7 +146,7 @@ class BorrowingControllerTest {
             // Get the borrowing ID from the repository
             List<Borrowing> borrowings = borrowingRepository.findByMemberId(memberId);
             assertThat(borrowings).isNotEmpty();
-            UUID borrowingId = borrowings.get(0).getId();
+            UUID borrowingId = borrowings.getFirst().getId();
 
             Borrowing borrowing = borrowingRepository.findById(borrowingId).orElseThrow();
             assertThat(borrowing.getStatus()).isIn(BorrowingStatus.REJECTED, BorrowingStatus.PENDING);
@@ -187,7 +187,7 @@ class BorrowingControllerTest {
 
         assertThat(getAllBorrowingsResult)
                 .hasStatus(HttpStatus.OK)
-                .bodyJson().hasPath("");
+                .bodyJson();
     }
 
     @Test

@@ -5,10 +5,9 @@ import org.jetbrains.conf.bookify.events.BookBorrowRequestEvent;
 import org.jetbrains.conf.bookify.events.BookReturnedEvent;
 import org.jspecify.annotations.Nullable;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.modulith.events.ApplicationModuleListener;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.transaction.event.TransactionalEventListener;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -108,8 +107,7 @@ class BookService {
      * Event listener for when a book is borrowed.
      * @param event the book borrowed event
      */
-    @TransactionalEventListener
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    @ApplicationModuleListener
     void handleBookBorrowedEvent(BookBorrowRequestEvent event) {
         Optional<Book> updatedBook = markBookAsBorrowed(event.bookId());
         eventPublisher.publishEvent(new BookAvailabilityCheckedEvent(event.bookId(), event.borrowId(), updatedBook.isPresent()));
@@ -119,8 +117,7 @@ class BookService {
      * Event listener for when a book is returned.
      * @param event the book returned event
      */
-    @TransactionalEventListener
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    @ApplicationModuleListener
     void handleBookReturnedEvent(BookReturnedEvent event) {
         markBookAsReturned(event.bookId());
     }
