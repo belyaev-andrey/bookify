@@ -42,7 +42,6 @@ class BookService {
      * @param id the id of the book to remove
      * @throws BookDeleteException if the book has borrowing records (active or historical)
      */
-    @Transactional
     void removeBook(UUID id) {
         try {
             bookRepository.deleteById(id);
