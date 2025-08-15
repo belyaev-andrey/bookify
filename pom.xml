@@ -5,7 +5,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>4.0.0-SNAPSHOT</version>
+        <version>3.5.4</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>org.jetbrains.conf</groupId>
@@ -30,6 +30,10 @@
                 <enabled>false</enabled>
             </releases>
         </repository>
+        <repository>
+            <id>jitpack.io</id>
+            <url>https://jitpack.io</url>
+        </repository>
     </repositories>
     <pluginRepositories>
         <pluginRepository>
@@ -51,7 +55,7 @@
     </pluginRepositories>
     <properties>
         <java.version>21</java.version>
-        <spring-modulith.version>2.0.0-SNAPSHOT</spring-modulith.version>
+        <spring-modulith.version>1.4.1</spring-modulith.version>
     </properties>
     <dependencies>
         <dependency>
@@ -71,17 +75,27 @@
             <artifactId>spring-modulith-starter-jdbc</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-flyway</artifactId>
+            <groupId>org.flywaydb</groupId>
+            <artifactId>flyway-core</artifactId>
         </dependency>
         <dependency>
             <groupId>org.flywaydb</groupId>
             <artifactId>flyway-database-postgresql</artifactId>
         </dependency>
         <dependency>
+            <groupId>org.jspecify</groupId>
+            <artifactId>jspecify</artifactId>
+            <version>1.0.0</version>
+        </dependency>
+        <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-devtools</artifactId>
             <optional>true</optional>
+        </dependency>
+        <dependency>
+            <groupId>com.github.Mamun-Al-Babu-Shikder</groupId>
+            <artifactId>spring-tx-board</artifactId>
+            <version>1.5.0</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -143,51 +157,51 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <configuration>
                     <showWarnings>true</showWarnings>
-<!--                    <compilerArgs>-->
-<!--                        <arg>-XDcompilePolicy=simple</arg>-->
-<!--                        <arg>&#45;&#45;should-stop=ifError=FLOW</arg>-->
-<!--                        <arg>-Xplugin:ErrorProne -Xep:NullAway:WARN -XepOpt:NullAway:OnlyNullMarked</arg>-->
-<!--                        <arg>-J&#45;&#45;add-exports=jdk.compiler/com.sun.tools.javac.api=ALL-UNNAMED</arg>-->
-<!--                        <arg>-J&#45;&#45;add-exports=jdk.compiler/com.sun.tools.javac.file=ALL-UNNAMED</arg>-->
-<!--                        <arg>-J&#45;&#45;add-exports=jdk.compiler/com.sun.tools.javac.main=ALL-UNNAMED</arg>-->
-<!--                        <arg>-J&#45;&#45;add-exports=jdk.compiler/com.sun.tools.javac.model=ALL-UNNAMED</arg>-->
-<!--                        <arg>-J&#45;&#45;add-exports=jdk.compiler/com.sun.tools.javac.parser=ALL-UNNAMED</arg>-->
-<!--                        <arg>-J&#45;&#45;add-exports=jdk.compiler/com.sun.tools.javac.processing=ALL-UNNAMED</arg>-->
-<!--                        <arg>-J&#45;&#45;add-exports=jdk.compiler/com.sun.tools.javac.tree=ALL-UNNAMED</arg>-->
-<!--                        <arg>-J&#45;&#45;add-exports=jdk.compiler/com.sun.tools.javac.util=ALL-UNNAMED</arg>-->
-<!--                        <arg>-J&#45;&#45;add-opens=jdk.compiler/com.sun.tools.javac.code=ALL-UNNAMED</arg>-->
-<!--                        <arg>-J&#45;&#45;add-opens=jdk.compiler/com.sun.tools.javac.comp=ALL-UNNAMED</arg>-->
-<!--                    </compilerArgs>-->
-<!--                    <annotationProcessorPaths>-->
-<!--                        <path>-->
-<!--                            <groupId>com.google.errorprone</groupId>-->
-<!--                            <artifactId>error_prone_core</artifactId>-->
-<!--                            <version>2.41.0</version>-->
-<!--                        </path>-->
-<!--                        <path>-->
-<!--                            <groupId>com.uber.nullaway</groupId>-->
-<!--                            <artifactId>nullaway</artifactId>-->
-<!--                            <version>0.12.8</version>-->
-<!--                        </path>-->
-<!--                    </annotationProcessorPaths>-->
+                    <!--                    <compilerArgs>-->
+                    <!--                        <arg>-XDcompilePolicy=simple</arg>-->
+                    <!--                        <arg>&#45;&#45;should-stop=ifError=FLOW</arg>-->
+                    <!--                        <arg>-Xplugin:ErrorProne -Xep:NullAway:WARN -XepOpt:NullAway:OnlyNullMarked</arg>-->
+                    <!--                        <arg>-J&#45;&#45;add-exports=jdk.compiler/com.sun.tools.javac.api=ALL-UNNAMED</arg>-->
+                    <!--                        <arg>-J&#45;&#45;add-exports=jdk.compiler/com.sun.tools.javac.file=ALL-UNNAMED</arg>-->
+                    <!--                        <arg>-J&#45;&#45;add-exports=jdk.compiler/com.sun.tools.javac.main=ALL-UNNAMED</arg>-->
+                    <!--                        <arg>-J&#45;&#45;add-exports=jdk.compiler/com.sun.tools.javac.model=ALL-UNNAMED</arg>-->
+                    <!--                        <arg>-J&#45;&#45;add-exports=jdk.compiler/com.sun.tools.javac.parser=ALL-UNNAMED</arg>-->
+                    <!--                        <arg>-J&#45;&#45;add-exports=jdk.compiler/com.sun.tools.javac.processing=ALL-UNNAMED</arg>-->
+                    <!--                        <arg>-J&#45;&#45;add-exports=jdk.compiler/com.sun.tools.javac.tree=ALL-UNNAMED</arg>-->
+                    <!--                        <arg>-J&#45;&#45;add-exports=jdk.compiler/com.sun.tools.javac.util=ALL-UNNAMED</arg>-->
+                    <!--                        <arg>-J&#45;&#45;add-opens=jdk.compiler/com.sun.tools.javac.code=ALL-UNNAMED</arg>-->
+                    <!--                        <arg>-J&#45;&#45;add-opens=jdk.compiler/com.sun.tools.javac.comp=ALL-UNNAMED</arg>-->
+                    <!--                    </compilerArgs>-->
+                    <!--                    <annotationProcessorPaths>-->
+                    <!--                        <path>-->
+                    <!--                            <groupId>com.google.errorprone</groupId>-->
+                    <!--                            <artifactId>error_prone_core</artifactId>-->
+                    <!--                            <version>2.41.0</version>-->
+                    <!--                        </path>-->
+                    <!--                        <path>-->
+                    <!--                            <groupId>com.uber.nullaway</groupId>-->
+                    <!--                            <artifactId>nullaway</artifactId>-->
+                    <!--                            <version>0.12.8</version>-->
+                    <!--                        </path>-->
+                    <!--                    </annotationProcessorPaths>-->
                 </configuration>
-<!--                <executions>-->
-<!--                    <execution>-->
-<!--                        <id>default-compile</id>-->
-<!--                        <phase>none</phase>-->
-<!--                    </execution>-->
-<!--                    <execution>-->
-<!--                        <id>default-testCompile</id>-->
-<!--                        <phase>none</phase>-->
-<!--                    </execution>-->
-<!--                    <execution>-->
-<!--                        <id>compile</id>-->
-<!--                        <phase>compile</phase>-->
-<!--                        <goals>-->
-<!--                            <goal>compile</goal>-->
-<!--                        </goals>-->
-<!--                    </execution>-->
-<!--                </executions>-->
+                <!--                <executions>-->
+                <!--                    <execution>-->
+                <!--                        <id>default-compile</id>-->
+                <!--                        <phase>none</phase>-->
+                <!--                    </execution>-->
+                <!--                    <execution>-->
+                <!--                        <id>default-testCompile</id>-->
+                <!--                        <phase>none</phase>-->
+                <!--                    </execution>-->
+                <!--                    <execution>-->
+                <!--                        <id>compile</id>-->
+                <!--                        <phase>compile</phase>-->
+                <!--                        <goals>-->
+                <!--                            <goal>compile</goal>-->
+                <!--                        </goals>-->
+                <!--                    </execution>-->
+                <!--                </executions>-->
             </plugin>
         </plugins>
     </build>
