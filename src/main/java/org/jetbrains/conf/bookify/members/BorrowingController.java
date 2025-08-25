@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/borrowings")
+@RequestMapping(value = "/api/borrowings")
 class BorrowingController {
 
     private final BorrowingService borrowingService;
@@ -21,7 +21,7 @@ class BorrowingController {
      *
      * @return a ResponseEntity containing a list of all borrowings
      */
-    @GetMapping("")
+    @GetMapping(value = "")
     public ResponseEntity<List<Borrowing>> getAll() {
         return ResponseEntity.ok(borrowingService.findAll());
     }
@@ -32,7 +32,7 @@ class BorrowingController {
      * @param memberId the ID of the member borrowing the book
      * @return the borrowing request if successful, 404 otherwise
      */
-    @PostMapping("/borrow")
+    @PostMapping(value = "/borrow", consumes = "application/json", produces = "application/json")
     ResponseEntity<Borrowing> borrowBook(@RequestParam UUID bookId, @RequestParam UUID memberId) {
         return borrowingService.borrowBook(bookId, memberId)
                 .map(ResponseEntity::ok)

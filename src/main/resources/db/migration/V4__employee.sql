@@ -3,13 +3,14 @@ create table employee
     organization    varchar(20),
     employee_number int,
     name            varchar(100),
-    birth_date      date,
+    birth_date      timestamp,
+    email           varchar(255),
     constraint employee_pk primary key (employee_number, organization)
 );
-INSERT INTO employee (organization, employee_number, name, birth_date)
-VALUES ('LIBRARY', 101, 'Eleanor Vance', '1985-03-12'),
-       ('SCIENCE', 201, 'Caleb Hayes', '1992-07-21'),
-       ('ACADEMY', 301, 'Isla Bennett', '1988-11-02');
+INSERT INTO employee (organization, employee_number, name, birth_date, email)
+VALUES ('LIBRARY', 101, 'Eleanor Vance', '1985-03-12', 'evance@mail.com'),
+       ('SCIENCE', 201, 'Caleb Hayes', '1992-07-21', 'chayes@mail.com'),
+       ('ACADEMY', 301, 'Isla Bennett', '1988-11-02', 'ibennett@mail.com');
 
 -- Add employee reference columns to borrowing table
 ALTER TABLE borrowing
