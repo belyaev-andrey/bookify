@@ -15,7 +15,7 @@ class ErrorControllerAdvice {
 
     private static final Logger log = LoggerFactory.getLogger(ErrorControllerAdvice.class);
 
-    @ExceptionHandler(Exception.class)
+    @ExceptionHandler(value = Exception.class, produces = "application/json")
     public ResponseEntity<Map<String, Object>> handleValidationExceptions(Exception ex) {
         log.error(ex.getMessage(), ex);
         return ResponseEntity.internalServerError().body(Map.of("error", ex.getMessage(), "stackTrace", ex.getStackTrace()));

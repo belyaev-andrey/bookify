@@ -32,7 +32,7 @@ class BorrowingController {
      * @param memberId the ID of the member borrowing the book
      * @return the borrowing request if successful, 404 otherwise
      */
-    @PostMapping(value = "/borrow", consumes = "application/json", produces = "application/json")
+    @PostMapping(value = "/borrow", produces = "application/json")
     ResponseEntity<Borrowing> borrowBook(@RequestParam UUID bookId, @RequestParam UUID memberId) {
         return borrowingService.borrowBook(bookId, memberId)
                 .map(ResponseEntity::ok)

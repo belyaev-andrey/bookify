@@ -19,7 +19,10 @@ public class Book implements Persistable<UUID> {
     private boolean available;
 
     @Transient
-    private boolean isNew;
+    private boolean isNew = true;
+
+    public Book() {
+    }
 
     @PersistenceCreator
     Book(@Nullable UUID id, String name, String isbn, boolean available) {
@@ -39,8 +42,9 @@ public class Book implements Persistable<UUID> {
         return id;
     }
 
-    public void setId(UUID id) {
+    public void setId(@Nullable UUID id) {
         this.id = id;
+        this.isNew = id == null;
     }
 
     public String getName() {

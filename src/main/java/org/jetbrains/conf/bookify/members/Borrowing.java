@@ -19,6 +19,7 @@ import java.util.UUID;
 @Table("borrowing")
 class Borrowing implements Persistable<UUID> {
     @Id
+    @Nullable
     private UUID id;
     @Column("book_id")
     @Nullable
@@ -38,7 +39,10 @@ class Borrowing implements Persistable<UUID> {
     //private AggregateReference<Employee, EmployeeId> employeeId;
 
     @Transient
-    private boolean isNew;
+    private boolean isNew = true;
+
+    public Borrowing() {
+    }
 
     @PersistenceCreator
     Borrowing(@Nullable UUID id, @Nullable UUID bookId, UUID requestedBookId,
@@ -67,8 +71,9 @@ class Borrowing implements Persistable<UUID> {
         return id;
     }
 
-    public void setId(UUID id) {
+    public void setId(@Nullable UUID id) {
         this.id = id;
+        this.isNew = id == null;
     }
 
     public @Nullable UUID getBookId() {
