@@ -36,7 +36,6 @@ class Borrowing implements Persistable<UUID> {
     private LocalDateTime returnDate;
     @Column("status")
     private BorrowingStatus status;
-    //private AggregateReference<Employee, EmployeeId> employeeId;
 
     @Transient
     private boolean isNew = true;
@@ -57,7 +56,6 @@ class Borrowing implements Persistable<UUID> {
         this.borrowDate = borrowDate;
         this.returnDate = returnDate;
         this.status = status;
-        //this.employeeId = AggregateReference.to(employeeId);
         this.isNew = id == null;
     }
 
@@ -116,34 +114,14 @@ class Borrowing implements Persistable<UUID> {
         this.returnDate = returnDate;
     }
 
-//    public EmployeeId getEmployee() {
-//        return employeeId.getId();
-//    }
-//
-//    public void setEmployee(EmployeeId employeeId) {
-//        this.employeeId = AggregateReference.to(employeeId);
-//    }
-
-    /**
-     * Checks if the book has been returned.
-     * @return true if the book has been returned, false otherwise
-     */
     public boolean isReturned() {
         return returnDate != null;
     }
 
-    /**
-     * Gets the status of the borrowing request.
-     * @return the status of the borrowing request
-     */
     public BorrowingStatus getStatus() {
         return status;
     }
 
-    /**
-     * Sets the status of the borrowing request.
-     * @param status the status to set
-     */
     public void setStatus(BorrowingStatus status) {
         this.status = status;
     }
