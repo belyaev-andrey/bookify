@@ -5,7 +5,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>4.0.0-M1</version>
+        <version>4.0.0-SNAPSHOT</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>org.jetbrains.conf</groupId>
@@ -51,7 +51,7 @@
     </pluginRepositories>
     <properties>
         <java.version>21</java.version>
-        <spring-modulith.version>2.0.0-M1</spring-modulith.version>
+        <spring-modulith.version>2.0.0-M2</spring-modulith.version>
     </properties>
     <dependencies>
         <dependency>
@@ -101,6 +101,10 @@
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-webmvc-test</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-testcontainers</artifactId>
             <scope>test</scope>
         </dependency>
@@ -112,11 +116,13 @@
         <dependency>
             <groupId>org.testcontainers</groupId>
             <artifactId>junit-jupiter</artifactId>
+            <version>1.21.3</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.testcontainers</groupId>
             <artifactId>postgresql</artifactId>
+            <version>1.21.3</version>
             <scope>test</scope>
         </dependency>
     </dependencies>

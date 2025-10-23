@@ -3,7 +3,7 @@ package org.jetbrains.conf.bookify.members;
 import org.jetbrains.conf.bookify.DbConfiguration;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpStatus;
@@ -53,7 +53,7 @@ class BorrowingControllerTest {
             // Get the borrowing ID from the repository
             List<Borrowing> borrowings = borrowingRepository.findByMemberId(memberId);
             assertThat(borrowings).isNotEmpty();
-            UUID borrowingId = borrowings.get(0).getId();
+            UUID borrowingId = borrowings.getFirst().getId();
 
             // Verify the borrowing status is initially PENDING
             Borrowing borrowing = borrowingRepository.findById(borrowingId).orElseThrow();
