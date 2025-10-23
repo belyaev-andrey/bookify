@@ -1,11 +1,11 @@
 package org.jetbrains.conf.bookify.members;
 
-import org.springframework.data.repository.CrudRepository;
+import org.springframework.data.repository.ListCrudRepository;
 
 import java.util.List;
 import java.util.UUID;
 
-interface BorrowingRepository extends CrudRepository<Borrowing, UUID> {
+interface BorrowingRepository extends ListCrudRepository<Borrowing, UUID> {
 
     /**
      * Find all borrowings for a specific member.
