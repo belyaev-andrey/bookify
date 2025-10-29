@@ -26,7 +26,7 @@ class BookService {
     }
 
     /**
-     * Add a book to the catalogue
+     * Add a book to the catalog
      * @param book the book to add
      * @return the saved book
      */
@@ -36,7 +36,7 @@ class BookService {
     }
 
     /**
-     * Remove a book from the catalogue
+     * Remove a book from the catalog
      * @param id the id of the book to remove
      */
     @Transactional
