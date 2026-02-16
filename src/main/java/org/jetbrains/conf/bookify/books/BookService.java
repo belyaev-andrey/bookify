@@ -5,6 +5,7 @@ import org.jetbrains.conf.bookify.events.BookBorrowRequestEvent;
 import org.jetbrains.conf.bookify.events.BookReturnedEvent;
 import org.jspecify.annotations.Nullable;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.modulith.events.ApplicationModuleListener;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -38,10 +39,15 @@ class BookService {
     /**
      * Remove a book from the catalog
      * @param id the id of the book to remove
+     * @throws BookDeleteException if the book has borrowing records (active or historical)
      */
     @Transactional
     void removeBook(UUID id) {
-        bookRepository.deleteById(id);
+        try {
+            bookRepository.deleteById(id);
+        } catch (DataIntegrityViolationException e) {
+            throw new BookDeleteException(id, e);
+        }
     }
 
     /**
