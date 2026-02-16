@@ -1,0 +1,1 @@
+create table member (id UUID primary key, name varchar, email varchar, password varchar, enabled boolean default true);

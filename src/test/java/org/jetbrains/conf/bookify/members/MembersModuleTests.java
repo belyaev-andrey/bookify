@@ -6,9 +6,11 @@ import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.modulith.core.ApplicationModules;
+import org.springframework.test.context.ActiveProfiles;
 
 @SpringBootTest
 @Import(DbConfiguration.class)
+@ActiveProfiles("test")
 class MembersModuleTests {
 
     @Test

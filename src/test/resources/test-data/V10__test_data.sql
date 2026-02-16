@@ -1,3 +1,28 @@
+INSERT INTO book (id, name, isbn) VALUES ('a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11', 'The Lord of the Rings', '9780618640157');
+INSERT INTO book (id, name, isbn) VALUES ('a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a12', '1984', '9780451524935');
+INSERT INTO book (id, name, isbn) VALUES ('a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a13', 'To Kill a Mockingbird', '9780446310789');
+INSERT INTO book (id, name, isbn) VALUES ('a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a14', 'The Catcher in the Rye', '9780316769488');
+INSERT INTO book (id, name, isbn) VALUES ('a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a15', 'Pride and Prejudice', '9780141439518');
+
+
+INSERT INTO member (id, name, email, password, enabled) VALUES ('b0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11', 'John Doe', 'john.doe@example.com', 'password123', true);
+INSERT INTO member (id, name, email, password, enabled) VALUES ('b0eebc99-9c0b-4ef8-bb6d-6bb9bd380a12', 'Jane Smith', 'jane.smith@example.com', 'password456', true);
+INSERT INTO member (id, name, email, password, enabled) VALUES ('b0eebc99-9c0b-4ef8-bb6d-6bb9bd380a13', 'Bob Johnson', 'bob.johnson@example.com', 'password789', true);
+
+INSERT INTO employee (organization, employee_number, name, birth_date, email)
+VALUES ('LIBRARY', 101, 'Eleanor Vance', '1985-03-12', 'evance@mail.com'),
+       ('SCIENCE', 201, 'Caleb Hayes', '1992-07-21', 'chayes@mail.com'),
+       ('ACADEMY', 301, 'Isla Bennett', '1988-11-02', 'ibennett@mail.com');
+
+-- Insert sample borrowing data with employee references
+INSERT INTO borrowing (id, book_id, requested_book_id, member_id, borrow_date, return_date, status,
+                       employee_organization, employee_number)
+VALUES ('550e8400-e29b-41d4-a716-446655440002', 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a12',
+        'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a12', 'b0eebc99-9c0b-4ef8-bb6d-6bb9bd380a12', '2024-01-10 14:15:00',
+        '2024-01-20 16:45:00', 'RETURNED', 'SCIENCE', 201),
+       ('550e8400-e29b-41d4-a716-446655440003', NULL, 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a13',
+        'b0eebc99-9c0b-4ef8-bb6d-6bb9bd380a13', '2024-01-18 09:00:00', NULL, 'PENDING', 'ACADEMY', 301);
+
 -- Additional test data for borrowing service tests
 -- This data provides comprehensive coverage of different borrowing scenarios
 
