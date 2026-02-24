@@ -6,4 +6,4 @@ services:
       - 'POSTGRES_PASSWORD=secret'
       - 'POSTGRES_USER=bookify'
     ports:
-      - '5432'
+      - '50253:5432'

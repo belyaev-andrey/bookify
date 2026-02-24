@@ -11,6 +11,8 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.assertj.MockMvcTester;
 
+import java.util.Base64;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest
@@ -18,6 +20,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 @Import(DbConfiguration.class)
 @ActiveProfiles("test")
 class BookControllerTest {
+
+    private static final String LIBRARIAN_AUTH = "Basic " + Base64.getEncoder().encodeToString("testlibrarian:password".getBytes());
 
     @Autowired
     private MockMvcTester mockMvc;
@@ -50,6 +54,7 @@ class BookControllerTest {
          // Add a book
          var addBookResult = mockMvc.post()
                  .uri("/api/books")
+                 .header("Authorization", LIBRARIAN_AUTH)
                  .contentType(MediaType.APPLICATION_JSON)
                  .content("{\"name\":\"Test Book\",\"isbn\":\"1234567890\"}");
 
@@ -62,6 +67,7 @@ class BookControllerTest {
         // Update a book
         var updateBookResult = mockMvc.put()
                 .uri("/api/books")
+                .header("Authorization", LIBRARIAN_AUTH)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("{\"id\":\"a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11\",\"name\":\"Test Book\",\"isbn\":\"1234567890\"}");
 
@@ -81,6 +87,7 @@ class BookControllerTest {
         // Update a book
         var updateBookResult = mockMvc.put()
                 .uri("/api/books")
+                .header("Authorization", LIBRARIAN_AUTH)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("{\"id\":\"00000000-0000-0000-0000-000000000000\",\"name\":\"Test Book\",\"isbn\":\"1234567890\"}");
 
@@ -91,7 +98,9 @@ class BookControllerTest {
 
     @Test
     void testRemoveBook() throws Exception {
-        var removeBookResult = mockMvc.delete().uri("/api/books/a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11");
+        var removeBookResult = mockMvc.delete()
+                .uri("/api/books/a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11")
+                .header("Authorization", LIBRARIAN_AUTH);
         assertThat(removeBookResult).hasStatus(HttpStatus.CONFLICT);
     }
 

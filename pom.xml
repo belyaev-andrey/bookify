@@ -73,6 +73,10 @@
             <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
         <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-security</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.springframework.modulith</groupId>
             <artifactId>spring-modulith-starter-core</artifactId>
         </dependency>
@@ -105,6 +109,11 @@
             <scope>test</scope>
         </dependency>
         <dependency>
+            <groupId>org.springframework.security</groupId>
+            <artifactId>spring-security-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-webmvc-test</artifactId>
             <scope>test</scope>
@@ -124,6 +133,16 @@
             <artifactId>postgresql</artifactId>
             <version>1.21.3</version>
             <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.skillsjars</groupId>
+            <artifactId>sivaprasadreddy__sivalabs-agent-skills__spring-boot</artifactId>
+            <version>2026_02_23-dba3310</version>
+        </dependency>
+        <dependency>
+            <groupId>com.skillsjars</groupId>
+            <artifactId>brunoborges__jdb-agentic-debugger__jdb-debugger</artifactId>
+            <version>2026_02_19-4b3ade6</version>
         </dependency>
     </dependencies>
     <dependencyManagement>
@@ -177,6 +196,17 @@
                         </annotationProcessor>
                     </annotationProcessors>
                     <showWarnings>true</showWarnings>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>com.skillsjars</groupId>
+                <artifactId>maven-plugin</artifactId>
+                <version>0.0.3-SNAPSHOT</version>
+                <configuration>
+                    <scopes>
+                        <scope>compile</scope>
+                        <scope>runtime</scope>
+                    </scopes>
                 </configuration>
             </plugin>
         </plugins>

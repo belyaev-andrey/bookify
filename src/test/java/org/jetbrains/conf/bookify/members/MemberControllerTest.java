@@ -11,6 +11,8 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.assertj.MockMvcTester;
 
+import java.util.Base64;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest
@@ -18,6 +20,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 @Import(DbConfiguration.class)
 @ActiveProfiles("test")
 class MemberControllerTest {
+
+    private static final String LIBRARIAN_AUTH = "Basic " + Base64.getEncoder().encodeToString("testlibrarian:password".getBytes());
 
     @Autowired
     private MockMvcTester mockMvc;
@@ -32,7 +36,9 @@ class MemberControllerTest {
 
     @Test
     void testFetchAllActive() throws Exception {
-        var activeRequestResult = mockMvc.get().uri("/api/members/active");
+        var activeRequestResult = mockMvc.get()
+                .uri("/api/members/active")
+                .header("Authorization", LIBRARIAN_AUTH);
         assertThat(activeRequestResult)
                 .hasStatus(HttpStatus.OK)
                 .bodyJson();
@@ -43,6 +49,7 @@ class MemberControllerTest {
         // Add a member
         var addMemberResult = mockMvc.post()
                 .uri("/api/members")
+                .header("Authorization", LIBRARIAN_AUTH)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("{\"name\":\"Test Member\",\"email\":\"test@example.com\",\"password\":\"password123\"}");
 
@@ -53,11 +60,15 @@ class MemberControllerTest {
     @Test
     void testDisableMember() throws Exception {
         // Disable a member (using a UUID from initial data)
-        var disableMemberResult = mockMvc.put().uri("/api/members/b0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11/disable");
+        var disableMemberResult = mockMvc.put()
+                .uri("/api/members/b0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11/disable")
+                .header("Authorization", LIBRARIAN_AUTH);
         assertThat(disableMemberResult).hasStatus(HttpStatus.OK);
 
         // Verify the member is now disabled by checking active members
-        var activeRequestResult = mockMvc.get().uri("/api/members/active");
+        var activeRequestResult = mockMvc.get()
+                .uri("/api/members/active")
+                .header("Authorization", LIBRARIAN_AUTH);
         assertThat(activeRequestResult)
                 .hasStatus(HttpStatus.OK)
                 .bodyJson();
