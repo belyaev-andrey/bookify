@@ -201,7 +201,7 @@
             <plugin>
                 <groupId>com.skillsjars</groupId>
                 <artifactId>maven-plugin</artifactId>
-                <version>0.0.3-SNAPSHOT</version>
+                <version>0.0.5</version>
                 <configuration>
                     <scopes>
                         <scope>compile</scope>
