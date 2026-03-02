@@ -2,6 +2,8 @@ package org.jetbrains.conf.bookify.books;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.querydsl.binding.QuerydslPredicate;
 import org.springframework.data.relational.core.mapping.event.BeforeConvertCallback;
 import org.springframework.data.repository.CrudRepository;
 
@@ -16,7 +18,7 @@ interface BookRepository extends CrudRepository<Book, UUID> {
      * @param name partial name to search for; must not be {@code null}
      * @return a list of matching books; never {@code null}, possibly empty
      */
-    List<Book> findByNameContainingIgnoreCase(String name);
+    List<Book> findByNameContainingIgnoreCase(String name, Sort sort);
 }
 
 @Configuration

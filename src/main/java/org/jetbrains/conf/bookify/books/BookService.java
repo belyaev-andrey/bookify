@@ -6,6 +6,7 @@ import org.jetbrains.conf.bookify.events.BookReturnedEvent;
 import org.jspecify.annotations.Nullable;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.domain.Sort;
 import org.springframework.modulith.events.ApplicationModuleListener;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -57,7 +58,8 @@ class BookService {
      */
     @Transactional(readOnly = true)
     List<Book> searchBooksByName(String name) {
-        return bookRepository.findByNameContainingIgnoreCase(name);
+        var sort = Sort.by(Sort.Direction.ASC, "name");
+        return bookRepository.findByNameContainingIgnoreCase(name, sort);
     }
 
     /**
