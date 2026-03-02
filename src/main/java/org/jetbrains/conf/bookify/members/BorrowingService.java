@@ -23,13 +23,6 @@ class BorrowingService {
     private final ApplicationEventPublisher eventPublisher;
     private final BookifySettingsConfig bookifySettingsConfig;
 
-    BorrowingService(BorrowingRepository borrowingRepository, MemberService memberService, ApplicationEventPublisher eventPublisher, BookifySettingsConfig bookifySettingsConfig) {
-        this.borrowingRepository = borrowingRepository;
-        this.memberService = memberService;
-        this.eventPublisher = eventPublisher;
-        this.bookifySettingsConfig = bookifySettingsConfig;
-    }
-
     /**
      * Create a borrowing request for a member.
      * @param bookId the ID of the book to borrow
@@ -38,16 +31,12 @@ class BorrowingService {
      */
     @Transactional
     Optional<Borrowing> borrowBook(UUID bookId, UUID memberId) {
-
         if (!isMemberEligibleToBorrow(memberId)) {
             return Optional.empty();
         }
-
         Borrowing borrowing = new Borrowing(null, null, bookId, memberId, null, null, BorrowingStatus.PENDING);
         Borrowing savedBorrowing = borrowingRepository.save(borrowing);
-
         eventPublisher.publishEvent(new BookBorrowRequestEvent(bookId, savedBorrowing.getId()));
-
         return Optional.of(savedBorrowing);
     }
 
@@ -177,4 +166,12 @@ class BorrowingService {
         borrowingRepository.findAll().forEach(all::add);
         return all;
     }
+
+    BorrowingService(BorrowingRepository borrowingRepository, MemberService memberService, ApplicationEventPublisher eventPublisher, BookifySettingsConfig bookifySettingsConfig) {
+        this.borrowingRepository = borrowingRepository;
+        this.memberService = memberService;
+        this.eventPublisher = eventPublisher;
+        this.bookifySettingsConfig = bookifySettingsConfig;
+    }
+
 }
