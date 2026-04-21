@@ -76,7 +76,6 @@ class BookService {
      * @param id the id of the book
      * @return the updated book if found and available, empty otherwise
      */
-    @Transactional
     Optional<Book> markBookAsBorrowed(UUID id) {
         Optional<Book> bookOpt = bookRepository.findById(id);
         if (bookOpt.isPresent()) {
@@ -94,7 +93,6 @@ class BookService {
      * @param id the id of the book
      * @return the updated book if found, empty otherwise
      */
-    @Transactional
     Optional<Book> markBookAsReturned(UUID id) {
         Optional<Book> bookOpt = bookRepository.findById(id);
         if (bookOpt.isPresent()) {
