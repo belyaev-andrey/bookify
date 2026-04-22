@@ -1,11 +1,22 @@
+/*
+ * Test
+ */
+
 package org.jetbrains.conf.bookify.members;
 
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.repository.ListCrudRepository;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 interface BorrowingRepository extends ListCrudRepository<Borrowing, UUID> {
+
+    @Override
+    @EntityGraph(attributePaths = {"requestedBook", "book", "member"},
+            type = EntityGraph.EntityGraphType.LOAD)
+    Optional<Borrowing> findById(UUID id);
 
     /**
      * Find all borrowings for a specific member.

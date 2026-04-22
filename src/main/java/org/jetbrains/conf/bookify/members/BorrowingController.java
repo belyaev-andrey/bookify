@@ -1,8 +1,13 @@
+/*
+ * Test
+ */
+
 package org.jetbrains.conf.bookify.members;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.net.URI;
 import java.util.List;
 import java.util.UUID;
 
@@ -33,9 +38,9 @@ class BorrowingController {
      * @return the borrowing request if successful, 404 otherwise
      */
     @PostMapping(value = "/borrow", produces = "application/json")
-    ResponseEntity<Borrowing> borrowBook(@RequestParam UUID bookId, @RequestParam UUID memberId) {
+    ResponseEntity<Object> borrowBook(@RequestParam UUID bookId, @RequestParam UUID memberId) {
         return borrowingService.borrowBook(bookId, memberId)
-                .map(ResponseEntity::ok)
+                .map(b -> ResponseEntity.created(URI.create("/%s".formatted(b.getId()))).build())
                 .orElse(ResponseEntity.notFound().build());
     }
 
