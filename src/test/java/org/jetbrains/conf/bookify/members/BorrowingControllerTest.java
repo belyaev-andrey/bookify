@@ -10,6 +10,10 @@
  * Test
  */
 
+/*
+ * Test
+ */
+
 package org.jetbrains.conf.bookify.members;
 
 import org.jetbrains.conf.bookify.DbConfiguration;

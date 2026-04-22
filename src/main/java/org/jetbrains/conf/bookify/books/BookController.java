@@ -1,3 +1,7 @@
+/*
+ * Test
+ */
+
 package org.jetbrains.conf.bookify.books;
 
 import org.springframework.http.HttpStatus;
