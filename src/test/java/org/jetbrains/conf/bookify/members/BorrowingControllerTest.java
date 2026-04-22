@@ -10,6 +10,10 @@
  * Test
  */
 
+/*
+ * Test
+ */
+
 package org.jetbrains.conf.bookify.members;
 
 import org.jetbrains.conf.bookify.DbConfiguration;
@@ -119,8 +123,7 @@ class BorrowingControllerTest {
                     .uri("/api/borrowings/return?bookId=" + TEST_BOOK_ID + "&memberId=" + memberId);
 
             assertThat(returnBookResult)
-                    .hasStatus(HttpStatus.OK)
-                    .bodyJson();
+                    .hasStatus(HttpStatus.ACCEPTED);
 
             // Verify the book has been returned
             borrowing = borrowingRepository.findById(borrowingId).orElseThrow();

@@ -2,6 +2,10 @@
  * Test
  */
 
+/*
+ * Test
+ */
+
 package org.jetbrains.conf.bookify.members;
 
 import org.springframework.http.ResponseEntity;
@@ -40,7 +44,7 @@ class BorrowingController {
     @PostMapping(value = "/borrow", produces = "application/json")
     ResponseEntity<Object> borrowBook(@RequestParam UUID bookId, @RequestParam UUID memberId) {
         return borrowingService.borrowBook(bookId, memberId)
-                .map(b -> ResponseEntity.created(URI.create("/%s".formatted(b.getId()))).build())
+                .map(b -> ResponseEntity.created(URI.create("/api/borrowings/%s".formatted(b.getId()))).build())
                 .orElse(ResponseEntity.notFound().build());
     }
 
@@ -64,9 +68,9 @@ class BorrowingController {
      * @return the updated borrowing record if successful, 404 otherwise
      */
     @PostMapping("/return")
-    ResponseEntity<Borrowing> returnBook(@RequestParam UUID bookId, @RequestParam UUID memberId) {
+    ResponseEntity<Object> returnBook(@RequestParam UUID bookId, @RequestParam UUID memberId) {
         return borrowingService.returnBook(bookId, memberId)
-                .map(ResponseEntity::ok)
+                .map(b -> ResponseEntity.accepted().build())
                 .orElse(ResponseEntity.notFound().build());
     }
 
