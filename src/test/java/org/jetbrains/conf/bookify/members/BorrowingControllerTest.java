@@ -1,3 +1,11 @@
+/*
+ * Test
+ */
+
+/*
+ * Test
+ */
+
 package org.jetbrains.conf.bookify.members;
 
 import org.jetbrains.conf.bookify.DbConfiguration;
@@ -5,7 +13,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.context.ActiveProfiles;
@@ -169,9 +176,10 @@ class BorrowingControllerTest {
             // Verify the borrowing status is now REJECTED (since the book doesn't exist)
             assertThat(status).isEqualTo(BorrowingStatus.REJECTED);
 
-            // Verify that the requestedBookId field is set to the non-existent book ID and the bookId field is null
-            assertThat(borrowing.getRequestedBookId()).isEqualTo(nonExistentBookId);
-            assertThat(borrowing.getBookId()).isNull();
+            // Verify that the requestedBook field is set to the non-existent book ID and the book field is null
+            assertThat(borrowing.getRequestedBook()).isNotNull();
+            assertThat(borrowing.getRequestedBook().getId()).isEqualTo(nonExistentBookId);
+            assertThat(borrowing.getBook()).isNull();
         } finally {
             // Clean up
             List<Borrowing> borrowings = borrowingRepository.findByMemberId(memberId);

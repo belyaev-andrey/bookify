@@ -1,4 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Test
+  -->
+
+<!--
+  ~ Test
+  -->
+
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
@@ -51,7 +59,7 @@
     </pluginRepositories>
     <properties>
         <java.version>21</java.version>
-        <spring-modulith.version>2.0.2</spring-modulith.version>
+        <spring-modulith.version>2.1.0-SNAPSHOT</spring-modulith.version>
     </properties>
     <dependencies>
         <dependency>
@@ -86,17 +94,12 @@
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-flyway</artifactId>
+            <artifactId>spring-boot-starter-flyway</artifactId>
         </dependency>
         <dependency>
             <groupId>org.flywaydb</groupId>
             <artifactId>flyway-database-postgresql</artifactId>
         </dependency>
-<!--        <dependency>-->
-<!--            <groupId>org.springframework.boot</groupId>-->
-<!--            <artifactId>spring-boot-devtools</artifactId>-->
-<!--            <optional>true</optional>-->
-<!--        </dependency>-->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-docker-compose</artifactId>
@@ -142,16 +145,6 @@
             <artifactId>postgresql</artifactId>
             <version>1.21.3</version>
             <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.skillsjars</groupId>
-            <artifactId>sivaprasadreddy__sivalabs-agent-skills__spring-boot</artifactId>
-            <version>2026_02_23-dba3310</version>
-        </dependency>
-        <dependency>
-            <groupId>com.skillsjars</groupId>
-            <artifactId>brunoborges__jdb-agentic-debugger__jdb-debugger</artifactId>
-            <version>2026_02_19-4b3ade6</version>
         </dependency>
     </dependencies>
     <dependencyManagement>

@@ -1,10 +1,15 @@
+/*
+ * Test
+ */
+
+/*
+ * Test
+ */
+
 package org.jetbrains.conf.bookify.members;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
-import jakarta.persistence.Transient;
-import org.springframework.data.annotation.PersistenceCreator;
+import jakarta.persistence.*;
+import org.jspecify.annotations.Nullable;
 import org.springframework.data.domain.Persistable;
 
 import java.util.UUID;
@@ -15,39 +20,29 @@ import java.util.UUID;
 @Entity
 @Table(name = "member")
 class Member implements Persistable<UUID> {
+
     @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
+    @Nullable
     private UUID id;
+    @Column(nullable = false)
     private String name;
+    @Column(nullable = false)
     private String email;
+    @Column(nullable = false)
     private String password;
-    private boolean enabled;
+    @Column(nullable = false)
+    private boolean enabled = true;
 
-    @Transient
-    private boolean isNew = true;
-
-    protected Member() {
-        this.id = UUID.randomUUID();
-        this.enabled = true;
-    }
-
-    @PersistenceCreator
-    Member(UUID id, String name, String email, String password, boolean enabled) {
-        this.id = id;
-        this.name = name;
-        this.email = email;
-        this.password = password;
-        this.enabled = enabled;
-        this.isNew = false;
+    @Override
+    @Nullable
+    public UUID getId() {
+        return id;
     }
 
     @Override
     public boolean isNew() {
-        return isNew;
-    }
-
-    @Override
-    public UUID getId() {
-        return id;
+        return id == null;
     }
 
     public void setId(UUID id) {

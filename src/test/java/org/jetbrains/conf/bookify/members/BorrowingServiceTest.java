@@ -1,6 +1,16 @@
+/*
+ * Test
+ */
+
+/*
+ * Test
+ */
+
 package org.jetbrains.conf.bookify.members;
 
+import jakarta.persistence.EntityManager;
 import org.jetbrains.conf.bookify.DbConfiguration;
+import org.jetbrains.conf.bookify.books.Book;
 import org.jetbrains.conf.bookify.config.BookifySettingsConfig;
 import org.jetbrains.conf.bookify.events.BookAvailabilityCheckedEvent;
 import org.junit.jupiter.api.AfterEach;
@@ -40,6 +50,9 @@ class BorrowingServiceTest {
     @Autowired
     private BookifySettingsConfig bookifySettingsConfig;
 
+    @Autowired
+    private EntityManager entityManager;
+
     // Test data UUIDs from migrations
     private static final UUID TEST_MEMBER_1 = UUID.fromString("b0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11");
     private static final UUID TEST_MEMBER_2 = UUID.fromString("b0eebc99-9c0b-4ef8-bb6d-6bb9bd380a12");
@@ -55,10 +68,18 @@ class BorrowingServiceTest {
         List<Borrowing> allBorrowings = borrowingService.findAll();
         for (Borrowing borrowing : allBorrowings) {
             // Only delete test borrowings (those created during tests, identified by specific patterns)
-            if (borrowing.getStatus() == BorrowingStatus.PENDING && borrowing.getBookId() == null) {
+            if (borrowing.getStatus() == BorrowingStatus.PENDING && borrowing.getBook() == null) {
                 borrowingRepository.deleteById(borrowing.getId());
             }
         }
+    }
+
+    private Book getBookReference(UUID bookId) {
+        return entityManager.getReference(Book.class, bookId);
+    }
+
+    private Member getMemberReference(UUID memberId) {
+        return entityManager.getReference(Member.class, memberId);
     }
 
     // ==================== Tests for borrowBook() ====================
@@ -82,9 +103,11 @@ class BorrowingServiceTest {
             Borrowing borrowing = result.get();
             assertThat(borrowing.getId()).isNotNull();
             assertThat(borrowing.getStatus()).isEqualTo(BorrowingStatus.PENDING);
-            assertThat(borrowing.getRequestedBookId()).isEqualTo(TEST_BOOK_1);
-            assertThat(borrowing.getMemberId()).isEqualTo(memberId);
-            assertThat(borrowing.getBookId()).isNull(); // Not yet assigned
+            assertThat(borrowing.getRequestedBook()).isNotNull();
+            assertThat(borrowing.getRequestedBook().getId()).isEqualTo(TEST_BOOK_1);
+            assertThat(borrowing.getMember()).isNotNull();
+            assertThat(borrowing.getMember().getId()).isEqualTo(memberId);
+            assertThat(borrowing.getBook()).isNull(); // Not yet assigned
             assertThat(borrowing.getBorrowDate()).isNull(); // Not yet approved
 
             // Cleanup
@@ -144,9 +167,9 @@ class BorrowingServiceTest {
             for (int i = 0; i < bookifySettingsConfig.getMaximumBooksBorrowed(); i++) {
                 Borrowing borrowing = new Borrowing(
                         null,
-                        bookIds[i], // Use existing book IDs
-                        bookIds[i],
-                        memberId,
+                        getBookReference(bookIds[i]),
+                        getBookReference(bookIds[i]),
+                        savedMember,
                         LocalDateTime.now().minusDays(1),
                         null, // Not returned
                         BorrowingStatus.APPROVED
@@ -184,9 +207,9 @@ class BorrowingServiceTest {
             // Create an overdue borrowing (borrowed more than 14 days ago)
             Borrowing overdueBorrowing = new Borrowing(
                     null,
-                    TEST_BOOK_1,
-                    TEST_BOOK_1,
-                    memberId,
+                    getBookReference(TEST_BOOK_1),
+                    getBookReference(TEST_BOOK_1),
+                    savedMember,
                     LocalDateTime.now().minusDays(bookifySettingsConfig.getOverdueDays() + 1), // 15 days ago
                     null, // Not returned
                     BorrowingStatus.APPROVED
@@ -220,9 +243,9 @@ class BorrowingServiceTest {
             // Create a borrowing 13 days ago (well within the 14-day limit)
             Borrowing borrowing = new Borrowing(
                     null,
-                    TEST_BOOK_2,
-                    TEST_BOOK_2,
-                    memberId,
+                    getBookReference(TEST_BOOK_2),
+                    getBookReference(TEST_BOOK_2),
+                    savedMember,
                     LocalDateTime.now().minusDays(13), // 13 days ago, not overdue
                     null,
                     BorrowingStatus.APPROVED
@@ -266,8 +289,8 @@ class BorrowingServiceTest {
         Borrowing borrowing = new Borrowing(
                 null,
                 null,
-                TEST_BOOK_1,
-                savedMember.getId(),
+                getBookReference(TEST_BOOK_1),
+                savedMember,
                 null,
                 null,
                 BorrowingStatus.PENDING
@@ -313,8 +336,8 @@ class BorrowingServiceTest {
         Borrowing borrowing = new Borrowing(
                 null,
                 null,
-                TEST_BOOK_1,
-                savedMember.getId(),
+                getBookReference(TEST_BOOK_1),
+                savedMember,
                 null,
                 null,
                 BorrowingStatus.PENDING
@@ -364,9 +387,9 @@ class BorrowingServiceTest {
         // Given: An already approved borrowing
         Borrowing borrowing = new Borrowing(
                 null,
-                TEST_BOOK_1,
-                TEST_BOOK_1,
-                TEST_MEMBER_3,
+                getBookReference(TEST_BOOK_1),
+                getBookReference(TEST_BOOK_1),
+                getMemberReference(TEST_MEMBER_3),
                 LocalDateTime.now(),
                 null,
                 BorrowingStatus.APPROVED
@@ -399,9 +422,9 @@ class BorrowingServiceTest {
         // Given: An active borrowing
         Borrowing borrowing = new Borrowing(
                 null,
-                TEST_BOOK_4,
-                TEST_BOOK_4,
-                TEST_MEMBER_3,
+                getBookReference(TEST_BOOK_4),
+                getBookReference(TEST_BOOK_4),
+                getMemberReference(TEST_MEMBER_3),
                 LocalDateTime.now().minusDays(5),
                 null, // Not yet returned
                 BorrowingStatus.APPROVED
@@ -447,9 +470,9 @@ class BorrowingServiceTest {
 
         Borrowing borrowing = new Borrowing(
                 null,
-                TEST_BOOK_2,
-                TEST_BOOK_2,
-                savedTestMember.getId(),
+                getBookReference(TEST_BOOK_2),
+                getBookReference(TEST_BOOK_2),
+                savedTestMember,
                 LocalDateTime.now().minusDays(3),
                 null,
                 BorrowingStatus.APPROVED
@@ -485,9 +508,9 @@ class BorrowingServiceTest {
 
         Borrowing borrowing = new Borrowing(
                 null,
-                TEST_BOOK_3,
-                TEST_BOOK_3,
-                savedTestMember.getId(),
+                getBookReference(TEST_BOOK_3),
+                getBookReference(TEST_BOOK_3),
+                savedTestMember,
                 LocalDateTime.now().minusDays(10),
                 LocalDateTime.now().minusDays(2), // Already returned
                 BorrowingStatus.RETURNED
@@ -656,9 +679,9 @@ class BorrowingServiceTest {
             for (int i = 0; i < bookifySettingsConfig.getMaximumBooksBorrowed(); i++) {
                 Borrowing borrowing = new Borrowing(
                         null,
-                        bookIds[i],
-                        bookIds[i],
-                        savedMember.getId(),
+                        getBookReference(bookIds[i]),
+                        getBookReference(bookIds[i]),
+                        savedMember,
                         LocalDateTime.now().minusDays(1),
                         null,
                         BorrowingStatus.APPROVED
@@ -695,9 +718,9 @@ class BorrowingServiceTest {
             // Create an overdue borrowing
             Borrowing overdueBorrowing = new Borrowing(
                     null,
-                    TEST_BOOK_1,
-                    TEST_BOOK_1,
-                    savedMember.getId(),
+                    getBookReference(TEST_BOOK_1),
+                    getBookReference(TEST_BOOK_1),
+                    savedMember,
                     LocalDateTime.now().minusDays(bookifySettingsConfig.getOverdueDays() + 5), // 19 days ago
                     null,
                     BorrowingStatus.APPROVED
@@ -732,9 +755,9 @@ class BorrowingServiceTest {
             for (int i = 0; i < 2; i++) {
                 Borrowing borrowing = new Borrowing(
                         null,
-                        bookIds[i],
-                        bookIds[i],
-                        savedMember.getId(),
+                        getBookReference(bookIds[i]),
+                        getBookReference(bookIds[i]),
+                        savedMember,
                         LocalDateTime.now().minusDays(5), // 5 days ago (not overdue)
                         null,
                         BorrowingStatus.APPROVED

@@ -1,9 +1,16 @@
+/*
+ * Test
+ */
+
+/*
+ * Test
+ */
+
 package org.jetbrains.conf.bookify.members;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
-import jakarta.persistence.Transient;
+import jakarta.persistence.*;
+import org.jetbrains.conf.bookify.books.Book;
+import org.jspecify.annotations.Nullable;
 import org.springframework.data.annotation.PersistenceCreator;
 import org.springframework.data.domain.Persistable;
 
@@ -17,41 +24,53 @@ import java.util.UUID;
 @Table(name = "borrowing")
 class Borrowing implements Persistable<UUID> {
     @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
+    @Nullable
     private UUID id;
-    private UUID bookId;
-    private UUID requestedBookId;
-    private UUID memberId;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "book_id")
+    @Nullable
+    private Book book;
+
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "requested_book_id")
+    private Book requestedBook;
+
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "member_id")
+    private Member member;
+
+    @Nullable
     private LocalDateTime borrowDate;
+    @Nullable
     private LocalDateTime returnDate;
-    private BorrowingStatus status;
 
-    @Transient
-    private boolean isNew = true;
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private BorrowingStatus status = BorrowingStatus.PENDING;
 
-    protected Borrowing() {
-        this.id = UUID.randomUUID();
-        this.status = BorrowingStatus.PENDING;
+    public Borrowing() {
     }
 
     @PersistenceCreator
-    Borrowing(UUID id, UUID bookId, UUID requestedBookId, UUID memberId, LocalDateTime borrowDate, LocalDateTime returnDate, BorrowingStatus status) {
+    Borrowing(@Nullable UUID id, @Nullable Book book, Book requestedBook, Member member, @Nullable LocalDateTime borrowDate, @Nullable LocalDateTime returnDate, BorrowingStatus status) {
         this.id = id;
-        this.bookId = bookId;
-        this.requestedBookId = requestedBookId;
-        this.memberId = memberId;
+        this.book = book;
+        this.requestedBook = requestedBook;
+        this.member = member;
         this.borrowDate = borrowDate;
         this.returnDate = returnDate;
         this.status = status;
-        this.isNew = false;
     }
 
     @Override
     public boolean isNew() {
-        return isNew;
+        return id == null;
     }
 
     @Override
-    public UUID getId() {
+    public @Nullable UUID getId() {
         return id;
     }
 
@@ -59,30 +78,32 @@ class Borrowing implements Persistable<UUID> {
         this.id = id;
     }
 
-    public UUID getBookId() {
-        return bookId;
+    @Nullable
+    public Book getBook() {
+        return book;
     }
 
-    public void setBookId(UUID bookId) {
-        this.bookId = bookId;
+    public void setBook(Book book) {
+        this.book = book;
     }
 
-    public UUID getRequestedBookId() {
-        return requestedBookId;
+    public Book getRequestedBook() {
+        return requestedBook;
     }
 
-    public void setRequestedBookId(UUID requestedBookId) {
-        this.requestedBookId = requestedBookId;
+    public void setRequestedBook(Book requestedBook) {
+        this.requestedBook = requestedBook;
     }
 
-    public UUID getMemberId() {
-        return memberId;
+    public Member getMember() {
+        return member;
     }
 
-    public void setMemberId(UUID memberId) {
-        this.memberId = memberId;
+    public void setMember(Member member) {
+        this.member = member;
     }
 
+    @Nullable
     public LocalDateTime getBorrowDate() {
         return borrowDate;
     }
@@ -91,6 +112,7 @@ class Borrowing implements Persistable<UUID> {
         this.borrowDate = borrowDate;
     }
 
+    @Nullable
     public LocalDateTime getReturnDate() {
         return returnDate;
     }
