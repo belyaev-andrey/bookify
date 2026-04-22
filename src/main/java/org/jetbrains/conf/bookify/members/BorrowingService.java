@@ -6,6 +6,10 @@
  * Test
  */
 
+/*
+ * Test
+ */
+
 package org.jetbrains.conf.bookify.members;
 
 import jakarta.persistence.EntityManager;
@@ -51,9 +55,9 @@ class BorrowingService {
         }
         Book requestedBook = entityManager.getReference(Book.class, bookId);
         Borrowing borrowing = new Borrowing(null, null, requestedBook, memberOpt.get(), null, null, BorrowingStatus.PENDING);
-        Borrowing savedBorrowing = borrowingRepository.save(borrowing);
-        eventPublisher.publishEvent(new BookBorrowRequestEvent(bookId, savedBorrowing.getId()));
-        return Optional.of(savedBorrowing);
+        UUID borrowingId = borrowingRepository.save(borrowing).getId();
+        eventPublisher.publishEvent(new BookBorrowRequestEvent(bookId, borrowingId));
+        return borrowingRepository.findById(borrowingId);
     }
 
     /**
@@ -72,6 +76,12 @@ class BorrowingService {
         // Check if the borrowing is still pending
         if (borrowing.getStatus() != BorrowingStatus.PENDING) {
             return;
+        }
+
+        // Restore requestedBook proxy when the book doesn't exist in DB: LEFT JOIN loaded null,
+        // but the NOT NULL column still holds the original UUID and must be preserved on save.
+        if (borrowing.getRequestedBook() == null) {
+            borrowing.setRequestedBook(entityManager.getReference(Book.class, event.bookId()));
         }
 
         if (event.available()) {
@@ -111,7 +121,7 @@ class BorrowingService {
         // Step 2: The Members module validates the borrowing record
         List<Borrowing> activeBorrowings = borrowingRepository.findByBookIdAndReturnDateIsNull(bookId);
         Optional<Borrowing> borrowingOpt = activeBorrowings.stream()
-                .filter(b -> b.getMember().getId().equals(memberId))
+                .filter(b -> (b.getMember().getId() != null) && (b.getMember().getId().equals(memberId)))
                 .findFirst();
 
         if (borrowingOpt.isEmpty()) {
@@ -173,15 +183,14 @@ class BorrowingService {
         // A book is considered overdue if it has been borrowed for more than 14 days
         LocalDateTime twoWeeksAgo = LocalDateTime.now().minusDays(bookifySettingsConfig.getOverdueDays());
         boolean hasOverdueBooks = activeBorrowings.stream()
-                .anyMatch(b -> b.getBorrowDate().isBefore(twoWeeksAgo));
+                .anyMatch(b -> b.getBorrowDate() != null && b.getBorrowDate().isBefore(twoWeeksAgo));
         return !hasOverdueBooks;
     }
 
     @Transactional(readOnly = true)
     public List<Borrowing> findAll() {
-        List<Borrowing> all = new ArrayList<>();
-        borrowingRepository.findAll().forEach(all::add);
-        return all;
+        List<Borrowing> borrowingList = borrowingRepository.findAll();
+        return new ArrayList<>(borrowingList);
     }
 
     BorrowingService(BorrowingRepository borrowingRepository, MemberService memberService, ApplicationEventPublisher eventPublisher, BookifySettingsConfig bookifySettingsConfig, EntityManager entityManager) {

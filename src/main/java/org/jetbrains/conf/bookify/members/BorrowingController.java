@@ -1,3 +1,7 @@
+/*
+ * Test
+ */
+
 package org.jetbrains.conf.bookify.members;
 
 import org.springframework.http.ResponseEntity;

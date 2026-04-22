@@ -6,6 +6,10 @@
  * Test
  */
 
+/*
+ * Test
+ */
+
 package org.jetbrains.conf.bookify.members;
 
 import jakarta.persistence.*;
@@ -28,16 +32,17 @@ class Borrowing implements Persistable<UUID> {
     @Nullable
     private UUID id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "book_id")
     @Nullable
     private Book book;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "requested_book_id")
+    @Nullable
     private Book requestedBook;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @ManyToOne(fetch = FetchType.EAGER, optional = false)
     @JoinColumn(name = "member_id")
     private Member member;
 
@@ -54,7 +59,7 @@ class Borrowing implements Persistable<UUID> {
     }
 
     @PersistenceCreator
-    Borrowing(@Nullable UUID id, @Nullable Book book, Book requestedBook, Member member, @Nullable LocalDateTime borrowDate, @Nullable LocalDateTime returnDate, BorrowingStatus status) {
+    Borrowing(@Nullable UUID id, @Nullable Book book, @Nullable Book requestedBook, Member member, @Nullable LocalDateTime borrowDate, @Nullable LocalDateTime returnDate, BorrowingStatus status) {
         this.id = id;
         this.book = book;
         this.requestedBook = requestedBook;
@@ -87,6 +92,7 @@ class Borrowing implements Persistable<UUID> {
         this.book = book;
     }
 
+    @Nullable
     public Book getRequestedBook() {
         return requestedBook;
     }

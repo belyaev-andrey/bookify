@@ -1,3 +1,7 @@
+/*
+ * Test
+ */
+
 package org.jetbrains.conf.bookify.books;
 
 import jakarta.persistence.EntityManager;
@@ -8,11 +12,13 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.TransactionTemplate;
 
 @SpringBootTest
 @Import(DbConfiguration.class)
+@ActiveProfiles("test")
 public class EntityManagerManualTransactionMgmntTest {
 
     @Autowired
