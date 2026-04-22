@@ -1,3 +1,11 @@
+/*
+ * Test
+ */
+
+/*
+ * Test
+ */
+
 package org.jetbrains.conf.bookify.members;
 
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -20,6 +28,7 @@ class MemberService {
 
     /**
      * Add a new member
+     *
      * @param member the member to add
      * @return the saved member
      */
@@ -30,6 +39,7 @@ class MemberService {
 
     /**
      * Disable a member
+     *
      * @param id the id of the member to disable
      * @return the updated member if found, empty otherwise
      */
@@ -47,6 +57,7 @@ class MemberService {
 
     /**
      * Search for members by name
+     *
      * @param name the name to search for
      * @return a list of members matching the search criteria
      */
@@ -57,6 +68,7 @@ class MemberService {
 
     /**
      * Search for members by email
+     *
      * @param email the email to search for
      * @return a list of members matching the search criteria
      */
@@ -67,26 +79,31 @@ class MemberService {
 
     /**
      * Get all members
+     *
      * @return a list of all members
      */
     @Transactional(readOnly = true)
     List<Member> findAll() {
         List<Member> members = new ArrayList<>();
-        memberRepository.findAll().forEach(members::add);
+        members.addAll(memberRepository.findAll());
         return members;
     }
 
     /**
      * Get all active members
+     *
      * @return a list of all active members
      */
     @Transactional(readOnly = true)
     List<Member> findAllActive() {
-        return memberRepository.findByEnabled(true);
+        List<Member> members = memberRepository.findAll()
+                .stream().filter(Member::isEnabled).toList();
+        return members;
     }
 
     /**
      * Get a member by its id
+     *
      * @param id the id of the member
      * @return the member, if found
      */

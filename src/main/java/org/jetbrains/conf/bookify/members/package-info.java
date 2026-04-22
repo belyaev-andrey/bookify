@@ -1,3 +1,11 @@
+/*
+ * Test
+ */
+
+/*
+ * Test
+ */
+
 /**
  * This package defines the members module of the Bookify application.
  * 
@@ -5,7 +13,8 @@
  * including registration, profile management, and authentication.</p>
  */
 @org.springframework.modulith.ApplicationModule(
-    displayName = "Bookify Members"
+        displayName = "Bookify Members",
+        allowedDependencies = {"books", "config", "events"}
 )
 @NullMarked
 package org.jetbrains.conf.bookify.members;

@@ -1,14 +1,24 @@
+/*
+ * Test
+ */
+
+/*
+ * Test
+ */
+
 package org.jetbrains.conf.bookify.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.data.jdbc.core.dialect.JdbcDialect;
-import org.springframework.data.jdbc.core.dialect.JdbcPostgresDialect;
+import org.springframework.context.annotation.Profile;
+import org.springframework.orm.jpa.JpaDialect;
+import org.springframework.orm.jpa.vendor.HibernateJpaDialect;
 
 @Configuration
+@Profile("aot")
 public class AotConfiguration {
     @Bean
-    JdbcDialect dialect() {
-        return JdbcPostgresDialect.INSTANCE;
+    JpaDialect dialect() {
+        return new HibernateJpaDialect();
     }
 }

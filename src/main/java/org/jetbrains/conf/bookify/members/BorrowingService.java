@@ -1,5 +1,15 @@
+/*
+ * Test
+ */
+
+/*
+ * Test
+ */
+
 package org.jetbrains.conf.bookify.members;
 
+import jakarta.persistence.EntityManager;
+import org.jetbrains.conf.bookify.books.Book;
 import org.jetbrains.conf.bookify.config.BookifySettingsConfig;
 import org.jetbrains.conf.bookify.events.BookAvailabilityCheckedEvent;
 import org.jetbrains.conf.bookify.events.BookBorrowRequestEvent;
@@ -22,6 +32,7 @@ class BorrowingService {
     private final MemberService memberService;
     private final ApplicationEventPublisher eventPublisher;
     private final BookifySettingsConfig bookifySettingsConfig;
+    private final EntityManager entityManager;
 
     /**
      * Create a borrowing request for a member.
@@ -34,7 +45,12 @@ class BorrowingService {
         if (!isMemberEligibleToBorrow(memberId)) {
             return Optional.empty();
         }
-        Borrowing borrowing = new Borrowing(null, null, bookId, memberId, null, null, BorrowingStatus.PENDING);
+        Optional<Member> memberOpt = memberService.findById(memberId);
+        if (memberOpt.isEmpty()) {
+            return Optional.empty();
+        }
+        Book requestedBook = entityManager.getReference(Book.class, bookId);
+        Borrowing borrowing = new Borrowing(null, null, requestedBook, memberOpt.get(), null, null, BorrowingStatus.PENDING);
         Borrowing savedBorrowing = borrowingRepository.save(borrowing);
         eventPublisher.publishEvent(new BookBorrowRequestEvent(bookId, savedBorrowing.getId()));
         return Optional.of(savedBorrowing);
@@ -62,7 +78,8 @@ class BorrowingService {
             // Book is available, approve the request
             borrowing.setBorrowDate(LocalDateTime.now());
             borrowing.setStatus(BorrowingStatus.APPROVED);
-            borrowing.setBookId(event.bookId());
+            Book book = entityManager.getReference(Book.class, event.bookId());
+            borrowing.setBook(book);
         } else {
             // Book is not available, reject the request
             borrowing.setStatus(BorrowingStatus.REJECTED);
@@ -94,7 +111,7 @@ class BorrowingService {
         // Step 2: The Members module validates the borrowing record
         List<Borrowing> activeBorrowings = borrowingRepository.findByBookIdAndReturnDateIsNull(bookId);
         Optional<Borrowing> borrowingOpt = activeBorrowings.stream()
-                .filter(b -> b.getMemberId().equals(memberId))
+                .filter(b -> b.getMember().getId().equals(memberId))
                 .findFirst();
 
         if (borrowingOpt.isEmpty()) {
@@ -167,11 +184,12 @@ class BorrowingService {
         return all;
     }
 
-    BorrowingService(BorrowingRepository borrowingRepository, MemberService memberService, ApplicationEventPublisher eventPublisher, BookifySettingsConfig bookifySettingsConfig) {
+    BorrowingService(BorrowingRepository borrowingRepository, MemberService memberService, ApplicationEventPublisher eventPublisher, BookifySettingsConfig bookifySettingsConfig, EntityManager entityManager) {
         this.borrowingRepository = borrowingRepository;
         this.memberService = memberService;
         this.eventPublisher = eventPublisher;
         this.bookifySettingsConfig = bookifySettingsConfig;
+        this.entityManager = entityManager;
     }
 
 }
