@@ -1,11 +1,3 @@
-/*
- * Test
- */
-
-/*
- * Test
- */
-
 create table event_publication
 (
     id                     uuid                        not null

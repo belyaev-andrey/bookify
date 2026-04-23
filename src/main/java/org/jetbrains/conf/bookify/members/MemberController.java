@@ -4,11 +4,16 @@
 
 package org.jetbrains.conf.bookify.members;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
+import java.security.Principal;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -17,6 +22,7 @@ import java.util.UUID;
 @RequestMapping(path = "/api/members")
 class MemberController {
 
+    private static final Logger log = LoggerFactory.getLogger(MemberController.class);
     private final MemberService memberService;
 
     MemberController(MemberService memberService) {
@@ -38,7 +44,8 @@ class MemberController {
      * @return a list of all active members
      */
     @GetMapping("/active")
-    ResponseEntity<List<Member>> getAllActive() {
+    ResponseEntity<List<Member>> getAllActive(Principal principal) {
+        log.info("Auth Principal Name:%s".formatted(principal.getName()));
         List<Member> memberList = memberService.findAllActive();
         return new ResponseEntity<>(memberList, HttpStatus.OK);
     }
