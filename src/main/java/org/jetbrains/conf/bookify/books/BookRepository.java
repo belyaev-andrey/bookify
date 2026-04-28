@@ -1,11 +1,3 @@
-/*
- * Test
- */
-
-/*
- * Test
- */
-
 package org.jetbrains.conf.bookify.books;
 
 import org.springframework.data.domain.Sort;

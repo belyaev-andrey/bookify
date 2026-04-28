@@ -1,7 +1,3 @@
-/*
- * Test
- */
-
 package org.jetbrains.conf.bookify.books;
 
 import org.jetbrains.conf.bookify.BookifyApplication;

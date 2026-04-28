@@ -1,7 +1,3 @@
-/*
- * Test
- */
-
 package org.jetbrains.conf.bookify.members;
 
 import org.springframework.data.jpa.repository.EntityGraph;

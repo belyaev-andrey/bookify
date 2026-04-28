@@ -1,11 +1,3 @@
-/*
- * Test
- */
-
-/*
- * Test
- */
-
 package org.jetbrains.conf.bookify.members;
 
 import org.springframework.security.access.prepost.PreAuthorize;
