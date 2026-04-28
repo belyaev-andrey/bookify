@@ -1,15 +1,3 @@
-/*
- * Test
- */
-
-/*
- * Test
- */
-
-/*
- * Test
- */
-
 package org.jetbrains.conf.bookify.members;
 
 import jakarta.persistence.*;

@@ -1,11 +1,3 @@
-/*
- * Test
- */
-
-/*
- * Test
- */
-
 /**
  * This package defines the members module of the Bookify application.
  * 

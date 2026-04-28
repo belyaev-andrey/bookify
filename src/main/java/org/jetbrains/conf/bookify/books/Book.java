@@ -1,11 +1,3 @@
-/*
- * Test
- */
-
-/*
- * Test
- */
-
 package org.jetbrains.conf.bookify.books;
 
 import jakarta.persistence.*;

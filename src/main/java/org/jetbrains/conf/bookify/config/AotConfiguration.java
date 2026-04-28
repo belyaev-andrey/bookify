@@ -1,11 +1,3 @@
-/*
- * Test
- */
-
-/*
- * Test
- */
-
 package org.jetbrains.conf.bookify.config;
 
 import org.springframework.context.annotation.Bean;

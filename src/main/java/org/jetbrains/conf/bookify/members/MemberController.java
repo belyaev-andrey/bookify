@@ -1,7 +1,3 @@
-/*
- * Test
- */
-
 package org.jetbrains.conf.bookify.members;
 
 import org.slf4j.Logger;
