@@ -25,7 +25,7 @@ class Borrowing implements Persistable<UUID> {
     @Nullable
     private Book book;
 
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.EAGER, optional = false)
     @JoinColumn(name = "requested_book_id")
     @Nullable
     private Book requestedBook;
