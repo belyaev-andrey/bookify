@@ -1,11 +1,3 @@
-/*
- * Test
- */
-
-/*
- * Test
- */
-
 create table member
 (
     id       UUID primary key,

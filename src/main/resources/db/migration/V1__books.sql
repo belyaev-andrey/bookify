@@ -1,11 +1,3 @@
-/*
- * Test
- */
-
-/*
- * Test
- */
-
 create table book
 (
     id        UUID primary key,
