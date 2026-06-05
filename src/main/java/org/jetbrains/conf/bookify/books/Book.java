@@ -1,13 +1,16 @@
 package org.jetbrains.conf.bookify.books;
 
 import jakarta.persistence.*;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.NullUnmarked;
 import org.springframework.data.domain.Persistable;
 
 import java.util.UUID;
 
 @Entity
 @Table(name = "book")
-public class Book implements Persistable<UUID> {
+@NullUnmarked
+public class Book implements Persistable<@NonNull UUID> {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -23,6 +26,7 @@ public class Book implements Persistable<UUID> {
         return id == null;
     }
 
+    @Override
     public UUID getId() {
         return id;
     }

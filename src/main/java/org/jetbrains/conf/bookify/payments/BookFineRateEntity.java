@@ -1,30 +1,34 @@
 package org.jetbrains.conf.bookify.payments;
 
-import org.springframework.data.annotation.Id;
-import org.springframework.data.annotation.PersistenceCreator;
-import org.springframework.data.annotation.Transient;
+import jakarta.persistence.*;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.NullUnmarked;
 import org.springframework.data.domain.Persistable;
-import org.springframework.data.relational.core.mapping.Column;
-import org.springframework.data.relational.core.mapping.Table;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.UUID;
 
-@Table("book_fine_rate")
-class BookFineRateEntity implements Persistable<UUID> {
+@Entity
+@Table(name = "book_fine_rate")
+@NullUnmarked
+class BookFineRateEntity implements Persistable<@NonNull UUID> {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
-    @Column("book_id")
+
+    @Column(name = "book_id", nullable = false)
     private UUID bookId;
-    @Column("price_per_day_overdue")
+
+    @Column(name = "price_per_day_overdue", nullable = false, precision = 10, scale = 2)
     private BigDecimal pricePerDayOverdue;
-    @Column("effective_date")
+
+    @Column(name = "effective_date", nullable = false)
     private LocalDate effectiveDate;
 
-    @Transient
-    private boolean isNew = true;
+    protected BookFineRateEntity() {
+    }
 
     BookFineRateEntity(UUID bookId, BigDecimal pricePerDayOverdue, LocalDate effectiveDate) {
         if (bookId == null) throw new IllegalArgumentException("bookId cannot be null");
@@ -32,19 +36,9 @@ class BookFineRateEntity implements Persistable<UUID> {
             throw new IllegalArgumentException("pricePerDayOverdue must be non-negative");
         }
         if (effectiveDate == null) throw new IllegalArgumentException("effectiveDate cannot be null");
-        this.id = UUID.randomUUID();
         this.bookId = bookId;
         this.pricePerDayOverdue = pricePerDayOverdue;
         this.effectiveDate = effectiveDate;
-    }
-
-    @PersistenceCreator
-    BookFineRateEntity(UUID id, UUID bookId, BigDecimal pricePerDayOverdue, LocalDate effectiveDate) {
-        this.id = id;
-        this.bookId = bookId;
-        this.pricePerDayOverdue = pricePerDayOverdue;
-        this.effectiveDate = effectiveDate;
-        this.isNew = false;
     }
 
     static BookFineRateEntity create(UUID bookId, BigDecimal pricePerDayOverdue, LocalDate effectiveDate) {
@@ -53,7 +47,7 @@ class BookFineRateEntity implements Persistable<UUID> {
 
     @Override
     public boolean isNew() {
-        return isNew;
+        return id == null;
     }
 
     @Override

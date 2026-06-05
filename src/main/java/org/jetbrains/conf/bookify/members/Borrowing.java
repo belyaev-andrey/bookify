@@ -2,6 +2,8 @@ package org.jetbrains.conf.bookify.members;
 
 import jakarta.persistence.*;
 import org.jetbrains.conf.bookify.books.Book;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.NullUnmarked;
 import org.jspecify.annotations.Nullable;
 import org.springframework.data.annotation.PersistenceCreator;
 import org.springframework.data.domain.Persistable;
@@ -14,29 +16,25 @@ import java.util.UUID;
  */
 @Entity
 @Table(name = "borrowing")
-class Borrowing implements Persistable<UUID> {
+@NullUnmarked
+class Borrowing implements Persistable<@NonNull UUID> {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
-    @Nullable
     private UUID id;
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "book_id")
-    @Nullable
     private Book book;
 
     @ManyToOne(fetch = FetchType.EAGER, optional = false)
     @JoinColumn(name = "requested_book_id")
-    @Nullable
     private Book requestedBook;
 
     @ManyToOne(fetch = FetchType.EAGER, optional = false)
     @JoinColumn(name = "member_id")
     private Member member;
 
-    @Nullable
     private LocalDateTime borrowDate;
-    @Nullable
     private LocalDateTime returnDate;
 
     @Enumerated(EnumType.STRING)
@@ -63,7 +61,7 @@ class Borrowing implements Persistable<UUID> {
     }
 
     @Override
-    public @Nullable UUID getId() {
+    public UUID getId() {
         return id;
     }
 
@@ -71,7 +69,6 @@ class Borrowing implements Persistable<UUID> {
         this.id = id;
     }
 
-    @Nullable
     public Book getBook() {
         return book;
     }
@@ -80,7 +77,6 @@ class Borrowing implements Persistable<UUID> {
         this.book = book;
     }
 
-    @Nullable
     public Book getRequestedBook() {
         return requestedBook;
     }
@@ -97,7 +93,6 @@ class Borrowing implements Persistable<UUID> {
         this.member = member;
     }
 
-    @Nullable
     public LocalDateTime getBorrowDate() {
         return borrowDate;
     }
@@ -106,7 +101,6 @@ class Borrowing implements Persistable<UUID> {
         this.borrowDate = borrowDate;
     }
 
-    @Nullable
     public LocalDateTime getReturnDate() {
         return returnDate;
     }

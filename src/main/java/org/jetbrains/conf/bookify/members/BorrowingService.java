@@ -44,6 +44,9 @@ class BorrowingService {
         Book requestedBook = entityManager.getReference(Book.class, bookId);
         Borrowing borrowing = new Borrowing(null, null, requestedBook, memberOpt.get(), null, null, BorrowingStatus.PENDING);
         UUID borrowingId = borrowingRepository.save(borrowing).getId();
+        if (borrowingId == null) {
+            return Optional.empty();
+        }
         eventPublisher.publishEvent(new BookBorrowRequestEvent(bookId, borrowingId));
         return borrowingRepository.findById(borrowingId);
     }
@@ -109,7 +112,7 @@ class BorrowingService {
         // Step 2: The Members module validates the borrowing record
         List<Borrowing> activeBorrowings = borrowingRepository.findByBookIdAndReturnDateIsNull(bookId);
         Optional<Borrowing> borrowingOpt = activeBorrowings.stream()
-                .filter(b -> (b.getMember().getId() != null) && (b.getMember().getId().equals(memberId)))
+                .filter(b -> (b.getMember() != null) && (b.getMember().getId() != null) && (b.getMember().getId().equals(memberId)))
                 .findFirst();
 
         if (borrowingOpt.isEmpty()) {

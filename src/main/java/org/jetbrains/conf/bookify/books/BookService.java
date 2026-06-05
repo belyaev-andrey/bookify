@@ -109,7 +109,7 @@ class BookService {
 
     @Transactional(readOnly = true)
     public Optional<Book> findById(@Nullable UUID id) {
-        return bookRepository.findById(id);
+        return id == null ? Optional.empty() : bookRepository.findById(id);
     }
 
     /**

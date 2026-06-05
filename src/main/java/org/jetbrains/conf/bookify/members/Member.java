@@ -1,7 +1,8 @@
 package org.jetbrains.conf.bookify.members;
 
 import jakarta.persistence.*;
-import org.jspecify.annotations.Nullable;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.NullUnmarked;
 import org.springframework.data.domain.Persistable;
 
 import java.util.UUID;
@@ -11,11 +12,11 @@ import java.util.UUID;
  */
 @Entity
 @Table(name = "member")
-class Member implements Persistable<UUID> {
+@NullUnmarked
+class Member implements Persistable<@NonNull UUID> {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
-    @Nullable
     private UUID id;
     @Column(nullable = false)
     private String name;
@@ -27,7 +28,6 @@ class Member implements Persistable<UUID> {
     private boolean enabled = true;
 
     @Override
-    @Nullable
     public UUID getId() {
         return id;
     }
