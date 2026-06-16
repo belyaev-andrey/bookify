@@ -1,6 +1,7 @@
 package org.jetbrains.conf.bookify.members;
 
 import org.jetbrains.conf.bookify.DbConfiguration;
+import org.jspecify.annotations.NullUnmarked;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
@@ -19,6 +20,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @AutoConfigureMockMvc
 @Import(DbConfiguration.class)
 @ActiveProfiles("test")
+@NullUnmarked
 class BorrowingControllerTest {
 
     @Autowired
@@ -181,7 +183,7 @@ class BorrowingControllerTest {
     }
 
     @Test
-    void testGetAllBorrowings() throws Exception {
+    void testGetAllBorrowings() {
         // Test the GET /api/borrowings endpoint
         var getAllBorrowingsResult = mockMvc.get()
                 .uri("/api/borrowings");
@@ -192,7 +194,7 @@ class BorrowingControllerTest {
     }
 
     @Test
-    void testIneligibleMemberCannotBorrow() throws Exception {
+    void testIneligibleMemberCannotBorrow() {
         // 1. Create a disabled member
         Member member = new Member();
         member.setName("Disabled Member");

@@ -8,6 +8,8 @@ import org.springframework.context.annotation.Import;
 import org.springframework.modulith.core.ApplicationModules;
 import org.springframework.test.context.ActiveProfiles;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+
 @SpringBootTest
 @Import(DbConfiguration.class)
 @ActiveProfiles("test")
@@ -17,6 +19,7 @@ class MembersModuleTests {
     void verifyModuleStructure() {
         // This test verifies that the members module follows the Spring Modulith structure rules
         ApplicationModules modules = ApplicationModules.of(BookifyApplication.class);
-        modules.getModuleByName("members").orElseThrow();
+        var module = modules.getModuleByName("members").orElseThrow();
+        assertNotNull(module);
     }
 }

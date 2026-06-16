@@ -3,8 +3,11 @@ package org.jetbrains.conf.bookify.books;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import org.jetbrains.conf.bookify.DbConfiguration;
+import org.jspecify.annotations.NullUnmarked;
+import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
@@ -15,6 +18,7 @@ import org.springframework.transaction.support.TransactionTemplate;
 @SpringBootTest
 @Import(DbConfiguration.class)
 @ActiveProfiles("test")
+@NullUnmarked
 public class EntityManagerManualTransactionMgmntTest {
 
     @Autowired
@@ -35,7 +39,8 @@ public class EntityManagerManualTransactionMgmntTest {
 
     @Test
     public void testDetachedEntity() {
-        Book next = bookRepository.findAll().iterator().next();
+        assertNotNull(entityManager);
+        Book next = bookRepository.findAll().getFirst();
         next.setIsbn("sd");
         transactionTemplate.execute(status -> {
             Book merged = entityManager.merge(next);

@@ -44,7 +44,7 @@ class SecurityConfig {
                         ).hasRole("LIBRARIAN")
                         .requestMatchers(HttpMethod.GET,
                                 "/api/members/active")
-                        .hasRole("LIBRARIAN")
+                        .hasAllRoles("LIBRARIAN", "ADMIN")
                         .anyRequest().anonymous()
                 )
                 .httpBasic(Customizer.withDefaults())
