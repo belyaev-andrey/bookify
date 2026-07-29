@@ -4,6 +4,27 @@ This project demonstrates the use of Spring Modulith to create a modular applica
 
 ## Application Architecture
 
+### Spring Data Repositories AOT implementation
+
+To run the application with AOT enabled, do the following:
+* In the `spring.properties` file set `spring.aot.enabled=false`
+* Build the application with the `aot` Maven profile active (this is what actually triggers AOT processing)
+```shell
+./mvnw clean verify -Paot
+```
+* Set `spring.aot.enabled` to `true`
+* Run the application
+```shell
+set SPRING_PROFILES_ACTIVE=aot
+./mvnw spring-boot:run     
+```
+The application should display in the console:
+```shell
+Starting AOT-processed BookifyApplication using Java 26...
+```
+⚠️ Spring Boot Docker Compose integration DOES NOT WORK in AOT mode
+
+
 ### Modules
 
 The application is organized into the following modules:
@@ -18,6 +39,12 @@ The application is organized into the following modules:
    - Handles member registration, profile management, and authentication
    - Defined with `@ApplicationModule` annotation in `package-info.java`
    - Has an allowed dependency on the Books module
+
+3. **Payments Module** (`org.jetbrains.conf.bookify.payments`)
+   - Manages overdue-fine rates for books and processes fines when a book is returned late
+   - Listens for `AssignFineEvent`; exposes `PaymentsAPI` for setting and reading fine rates
+   - Defined with `@ApplicationModule` annotation in `package-info.java`
+   - Has an allowed dependency on the Events module
 
 ### Module Structure
 
@@ -51,6 +78,13 @@ Each module follows these Spring Modulith best practices:
   - `password` (String): Password for authentication
   - `enabled` (boolean): Whether the member account is active
 
+#### Payments Module
+- **BookFineRateEntity**
+  - `id` (UUID): Primary key
+  - `bookId` (UUID): The book this rate applies to
+  - `pricePerDayOverdue` (BigDecimal): Fine charged per day overdue
+  - `effectiveDate` (LocalDate): Date from which this rate applies
+
 ### REST API Endpoints
 
 #### Books Module
@@ -83,6 +117,12 @@ The application uses a PostgreSQL database with the following tables:
    - `password` (varchar)
    - `enabled` (boolean, default true)
 
+3. **book_fine_rate**
+   - `id` (UUID, primary key)
+   - `book_id` (UUID)
+   - `price_per_day_overdue` (numeric(10,2))
+   - `effective_date` (date)
+
 Database migrations are managed using Flyway, with migration scripts in the `src/main/resources/db/migration` directory.
 
 ### Docker Setup
@@ -100,6 +140,7 @@ services:
     ports:
       - '5432'
 ```
+Spring Boot Docker Compose integration DOES NOT WORK in AOT mode
 
 ## Testing with Spring Modulith
 

@@ -19,6 +19,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 # Run a single test method
 ./mvnw test -Dtest=BookControllerTest#testAddBook
+
+# Build with AOT processing (the aot Maven profile must be explicitly activated)
+./mvnw clean verify -Paot
 ```
 
 Tests require Docker (Testcontainers spins up `postgres:17-alpine`). The dev profile starts the database via Spring
@@ -43,6 +46,11 @@ access rules are violated.
 **Modules communicate exclusively via Spring Application Events** defined in the `events` package. Direct cross-module
 bean injection is not allowed by Modulith. Use `@ApplicationModuleListener` for event consumers.
 
+**Persistence**: this branch (`main`) uses Spring Data JDBC — entities implement `Persistable<UUID>` with a
+`@PersistenceCreator` constructor, repositories extend `CrudRepository`/`ListCrudRepository` with native-SQL `@Query`
+methods. The `spring-data-jpa` branch uses Spring Data JPA/Hibernate instead (`@Entity`, `JpaRepository`, JPQL
+`@Query`). The persistence-layer shape of entities/repositories is not copy-paste compatible between the two branches.
+
 ### Borrow/Return Flow
 
 1. `BorrowingService.borrowBook()` — creates a `PENDING` borrowing, publishes `BookBorrowRequestEvent`
@@ -61,6 +69,12 @@ HTTP Basic Auth. `LIBRARIAN` role is required for `POST /api/members`, `POST /ap
 `PUT /api/members/**`, `PUT /api/books`, and `GET /api/members/active`. All other endpoints are anonymous. Users are
 stored in the database and managed via `JdbcUserDetailsManager`.
 
+Two `SecurityFilterChain` beans exist in `SecurityConfig`: the default one above is active unless the
+`strict-security` Spring profile is on, in which case a stricter variant requires `ADMIN` instead of `LIBRARIAN` for
+the same endpoints — reading the source alone doesn't tell you which is enforced at runtime; that depends on the
+active profile. `BookService.removeBook` is additionally guarded by `@PreAuthorize("hasRole('LIBRARIAN')")`
+(`@EnableMethodSecurity` is on), demonstrating that unlocking the HTTP-level rule also satisfies the method-level one.
+
 ### Configuration
 
 Business rules are externalized in `BookifySettingsConfig` (`@ConfigurationProperties(prefix = "bookify")`):
@@ -71,8 +85,13 @@ Business rules are externalized in `BookifySettingsConfig` (`@ConfigurationPrope
 ### Database
 
 Flyway manages schema migrations in `src/main/resources/db/migration/`. The dev profile also loads seed data from
-`src/main/resources/data/`. Tests use `src/test/resources/test-data/`. Spring Modulith's event outbox uses
-`event_publication` and `event_publication_archive` tables (V11).
+`src/main/resources/data/`. Tests use `src/test/resources/test-data/`.
+
+Spring Modulith's event outbox uses `event_publication` and `event_publication_archive` tables, auto-created via
+`spring.modulith.events.jdbc.schema-initialization.enabled`. It's explicitly set in `application-test.properties` (so
+tests always have the tables); it's commented out in `application-dev.properties` — check it before relying on
+durable event publication outside tests. The `spring-data-jpa` branch additionally ships an explicit Flyway migration
+for the same tables (`V11__modulith_events.sql`).
 
 ### Testing
 
