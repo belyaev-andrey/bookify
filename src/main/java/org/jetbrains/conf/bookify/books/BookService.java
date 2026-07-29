@@ -8,6 +8,7 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Sort;
 import org.springframework.modulith.events.ApplicationModuleListener;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -43,6 +44,7 @@ class BookService {
      * @throws BookDeleteException if the book has borrowing records (active or historical)
      */
     @Transactional
+    @PreAuthorize("hasRole('LIBRARIAN')")
     void removeBook(UUID id) {
         try {
             bookRepository.deleteById(id);

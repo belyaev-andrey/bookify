@@ -1,0 +1,41 @@
+### Bookify API — sample requests for the Security Inlays demo.
+### Run the app with the `dev` profile active first (it seeds the `librarian` / `password` user) -
+### e.g. `-Dspring-boot.run.profiles=dev`. Server then listens on port 8081.
+
+@host = http://localhost:8081
+
+### List all books — public, no auth required
+GET {{host}}/api/books
+
+### Add a book without auth — Spring Security rejects this before BookController ever runs
+POST {{host}}/api/books
+Content-Type: application/json
+
+{
+  "name": "Refactoring",
+  "isbn": "9780134757599"
+}
+
+### Same request as the librarian — satisfies the HTTP-level role check, 201 Created
+POST {{host}}/api/books
+Content-Type: application/json
+Authorization: Basic librarian password
+
+{
+  "name": "Refactoring",
+  "isbn": "9780134757599"
+}
+
+### Delete a book without auth — blocked before BookService.removeBook() runs
+DELETE {{host}}/api/books/a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a15
+
+### Same delete as the librarian — satisfies both the HTTP matcher and BookService's @PreAuthorize
+DELETE {{host}}/api/books/a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a15
+Authorization: Basic librarian password
+
+### Who's currently active? Requires LIBRARIAN — 401 without auth
+GET {{host}}/api/members/active
+
+### Same request as the librarian — 200
+GET {{host}}/api/members/active
+Authorization: Basic librarian password
