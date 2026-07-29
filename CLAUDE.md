@@ -46,10 +46,10 @@ access rules are violated.
 **Modules communicate exclusively via Spring Application Events** defined in the `events` package. Direct cross-module
 bean injection is not allowed by Modulith. Use `@ApplicationModuleListener` for event consumers.
 
-**Persistence**: this branch (`main`) uses Spring Data JDBC — entities implement `Persistable<UUID>` with a
-`@PersistenceCreator` constructor, repositories extend `CrudRepository`/`ListCrudRepository` with native-SQL `@Query`
-methods. The `spring-data-jpa` branch uses Spring Data JPA/Hibernate instead (`@Entity`, `JpaRepository`, JPQL
-`@Query`). The persistence-layer shape of entities/repositories is not copy-paste compatible between the two branches.
+**Persistence**: this branch (`spring-data-jpa`) uses Spring Data JPA/Hibernate — entities are `@Entity` classes,
+repositories extend `ListCrudRepository` with JPQL `@Query` methods. The `main` branch uses Spring Data JDBC instead
+(`Persistable<UUID>` + a `@PersistenceCreator` constructor, `CrudRepository`/`ListCrudRepository`, native-SQL `@Query`).
+The persistence-layer shape of entities/repositories is not copy-paste compatible between the two branches.
 
 ### Borrow/Return Flow
 
@@ -115,11 +115,12 @@ Conventions for the binding rule every `bookify.*` property must follow.
 Flyway manages schema migrations in `src/main/resources/db/migration/`. The dev profile also loads seed data from
 `src/main/resources/data/`. Tests use `src/test/resources/test-data/`.
 
-Spring Modulith's event outbox uses `event_publication` and `event_publication_archive` tables, auto-created via
-`spring.modulith.events.jdbc.schema-initialization.enabled`. It's explicitly set in `application-test.properties` (so
-tests always have the tables); it's commented out in `application-dev.properties` — check it before relying on
-durable event publication outside tests. The `spring-data-jpa` branch additionally ships an explicit Flyway migration
-for the same tables (`V11__modulith_events.sql`).
+Spring Modulith's event outbox uses `event_publication` and `event_publication_archive` tables. This branch creates
+them via an explicit Flyway migration (`V11__modulith_events.sql`), applied in both `test` and `dev`. The `main`
+branch has no such migration and instead relies on
+`spring.modulith.events.jdbc.schema-initialization.enabled` — explicitly set in its `application-test.properties`,
+but commented out in `application-dev.properties`, so check it there before relying on durable event publication
+outside tests.
 
 ### Testing
 
