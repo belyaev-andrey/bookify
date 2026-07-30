@@ -23,10 +23,11 @@ class ErrorControllerAdvice {
     @ExceptionHandler(value = BookDeleteException.class, produces = "application/json")
     public ResponseEntity<Map<String, String>> handleBookHasBorrowingsException(BookDeleteException ex) {
         log.warn("Attempt to delete has failed: {}", ex.getMessage());
+        Throwable cause = ex.getCause();
         return ResponseEntity.status(HttpStatus.CONFLICT)
                 .body(Map.of(
                         "error", "Cannot delete book",
-                        "message", "This book cannot be deleted: %s caused by %s".formatted(ex.getMessage(), ex.getCause().getMessage()),
+                        "message", "This book cannot be deleted: %s caused by %s".formatted(ex.getMessage(), cause == null ? "Unknown" : cause.getMessage()),
                         "bookId", ex.getBookId().toString()
                 ));
     }
