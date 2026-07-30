@@ -5,6 +5,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
@@ -28,6 +29,18 @@ class ErrorControllerAdvice {
                         "message", "This book cannot be deleted: %s caused by %s".formatted(ex.getMessage(), ex.getCause().getMessage()),
                         "bookId", ex.getBookId().toString()
                 ));
+    }
+
+    /**
+     * Handle method-security denials (e.g. a {@code @PreAuthorize} check that the caller's
+     * authorities don't satisfy) as HTTP 403, same as an HTTP-layer authorization failure.
+     * Without this, the catch-all handler below would turn it into a 500.
+     */
+    @ExceptionHandler(value = AccessDeniedException.class, produces = "application/json")
+    public ResponseEntity<Map<String, String>> handleAccessDeniedException(AccessDeniedException ex) {
+        log.warn("Access denied: {}", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                .body(Map.of("error", "Access denied", "message", ex.getMessage()));
     }
 
     /**

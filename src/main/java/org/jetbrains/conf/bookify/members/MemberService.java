@@ -1,5 +1,6 @@
 package org.jetbrains.conf.bookify.members;
 
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -33,6 +34,7 @@ class MemberService {
      * @return the updated member if found, empty otherwise
      */
     @Transactional
+    @PreAuthorize("hasRole('SUPERVISOR')")
     Optional<Member> disableMember(UUID id) {
         Optional<Member> memberOpt = memberRepository.findById(id);
         if (memberOpt.isPresent()) {

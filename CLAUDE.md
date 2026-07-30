@@ -73,7 +73,17 @@ Two `SecurityFilterChain` beans exist in `SecurityConfig`: the default one above
 `strict-security` Spring profile is on, in which case a stricter variant requires `ADMIN` instead of `LIBRARIAN` for
 the same endpoints — reading the source alone doesn't tell you which is enforced at runtime; that depends on the
 active profile. `BookService.removeBook` is additionally guarded by `@PreAuthorize("hasRole('LIBRARIAN')")`
-(`@EnableMethodSecurity` is on), demonstrating that unlocking the HTTP-level rule also satisfies the method-level one.
+(`@EnableMethodSecurity` is on), demonstrating that unlocking the HTTP-level rule also satisfies the method-level one,
+since both layers require the same role.
+
+`MemberService.disableMember` demonstrates the opposite case: it's guarded by
+`@PreAuthorize("hasRole('SUPERVISOR')")`, a role that never appears in `SecurityConfig`. A librarian passes the
+HTTP-level matcher for `PUT /api/members/**` (which only checks `LIBRARIAN`) but is still denied at the method layer,
+since `SUPERVISOR` isn't part of the authorities the HTTP rule grants. There's no local account with `SUPERVISOR`, and
+the inlay has no visibility into method-security annotations, so simple unlock (which only grants what the HTTP layer
+requires) doesn't help either — reaching this method requires "Unlock with custom authorities" with a role list that
+includes `SUPERVISOR` alongside `LIBRARIAN`. `AccessDeniedException` (thrown by a denied `@PreAuthorize` check) is
+mapped to HTTP 403 by `ErrorControllerAdvice`, ahead of its catch-all `Exception` handler.
 
 ### Configuration
 

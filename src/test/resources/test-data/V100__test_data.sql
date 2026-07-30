@@ -5,6 +5,15 @@ VALUES ('testlibrarian', '$2a$10$YKyJ5KAYVg7lbwoIzvtXOOxe2VPEvat7IY4AkgQp2mPnZjZ
 INSERT INTO authorities (username, authority)
 VALUES ('testlibrarian', 'ROLE_LIBRARIAN');
 
+-- Test user holding the SUPERVISOR authority that MemberService.disableMember requires via
+-- @PreAuthorize - a role that isn't part of any HTTP-level rule in SecurityConfig, so a plain
+-- LIBRARIAN passes the HTTP matcher for PUT /api/members/** but is still denied at the method layer.
+INSERT INTO users (username, password, enabled)
+VALUES ('testsupervisor', '$2a$10$YKyJ5KAYVg7lbwoIzvtXOOxe2VPEvat7IY4AkgQp2mPnZjZw6.58C', true);
+
+INSERT INTO authorities (username, authority)
+VALUES ('testsupervisor', 'ROLE_LIBRARIAN'), ('testsupervisor', 'ROLE_SUPERVISOR');
+
 INSERT INTO book (id, name, isbn) VALUES ('a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11', 'The Lord of the Rings', '9780618640157');
 INSERT INTO book (id, name, isbn) VALUES ('a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a12', '1984', '9780451524935');
 INSERT INTO book (id, name, isbn) VALUES ('a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a13', 'To Kill a Mockingbird', '9780446310789');

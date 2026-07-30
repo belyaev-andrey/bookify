@@ -22,6 +22,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 class MemberControllerTest {
 
     private static final String LIBRARIAN_AUTH = "Basic " + Base64.getEncoder().encodeToString("testlibrarian:password".getBytes());
+    private static final String SUPERVISOR_AUTH = "Basic " + Base64.getEncoder().encodeToString("testsupervisor:password".getBytes());
 
     @Autowired
     private MockMvcTester mockMvc;
@@ -59,10 +60,12 @@ class MemberControllerTest {
 
     @Test
     void testDisableMember() throws Exception {
-        // Disable a member (using a UUID from initial data)
+        // Disabling a member requires SUPERVISOR via @PreAuthorize on MemberService.disableMember,
+        // in addition to the LIBRARIAN role the HTTP-level matcher checks - a plain librarian
+        // passes the matcher but is denied at the method layer.
         var disableMemberResult = mockMvc.put()
                 .uri("/api/members/b0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11/disable")
-                .header("Authorization", LIBRARIAN_AUTH);
+                .header("Authorization", SUPERVISOR_AUTH);
         assertThat(disableMemberResult).hasStatus(HttpStatus.OK);
 
         // Verify the member is now disabled by checking active members

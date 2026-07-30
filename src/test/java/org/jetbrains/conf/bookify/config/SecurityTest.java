@@ -23,6 +23,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 class SecurityTest {
 
     private static final String LIBRARIAN_AUTH = "Basic " + Base64.getEncoder().encodeToString("testlibrarian:password".getBytes());
+    private static final String SUPERVISOR_AUTH = "Basic " + Base64.getEncoder().encodeToString("testsupervisor:password".getBytes());
     private static final String INVALID_AUTH = "Basic " + Base64.getEncoder().encodeToString("invalid:wrongpassword".getBytes());
 
     @Autowired
@@ -188,12 +189,15 @@ class SecurityTest {
         }
 
         @Test
-        void putMembersDisable_withLibrarianRole_succeeds() {
+        void putMembersDisable_withLibrarianRoleOnly_isForbidden() {
+            // Passes the HTTP-level matcher (LIBRARIAN), but MemberService.disableMember also
+            // requires SUPERVISOR via @PreAuthorize - a role that isn't part of any HTTP rule
+            // in SecurityConfig, so a plain librarian is denied at the method layer.
             var result = mockMvc.put()
                     .uri("/api/members/b0eebc99-9c0b-4ef8-bb6d-6bb9bd380a12/disable")
                     .header("Authorization", LIBRARIAN_AUTH);
 
-            assertThat(result).hasStatus(HttpStatus.OK);
+            assertThat(result).hasStatus(HttpStatus.FORBIDDEN);
         }
 
         @Test
@@ -201,6 +205,21 @@ class SecurityTest {
             var result = mockMvc.get()
                     .uri("/api/members/active")
                     .header("Authorization", LIBRARIAN_AUTH);
+
+            assertThat(result).hasStatus(HttpStatus.OK);
+        }
+    }
+
+    @Nested
+    class SupervisorAccess {
+
+        @Test
+        void putMembersDisable_withLibrarianAndSupervisorRoles_succeeds() {
+            // Satisfies both the HTTP-level matcher (LIBRARIAN) and the method-level
+            // @PreAuthorize check on MemberService.disableMember (SUPERVISOR).
+            var result = mockMvc.put()
+                    .uri("/api/members/b0eebc99-9c0b-4ef8-bb6d-6bb9bd380a13/disable")
+                    .header("Authorization", SUPERVISOR_AUTH);
 
             assertThat(result).hasStatus(HttpStatus.OK);
         }

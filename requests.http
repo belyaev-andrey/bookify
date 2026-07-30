@@ -39,3 +39,13 @@ GET {{host}}/api/members/active
 ### Same request as the librarian — 200
 GET {{host}}/api/members/active
 Authorization: Basic librarian password
+
+### Disable a member as the librarian — satisfies the HTTP-level matcher (PUT /api/members/**
+### requires LIBRARIAN), but MemberService.disableMember also carries
+### @PreAuthorize("hasRole('SUPERVISOR')") — a role that appears nowhere in SecurityConfig, so
+### there's no inlay roles list warning about it. 403, even though the same librarian request
+### succeeds on every other /api/members/** endpoint. Simple unlock from the inlay wouldn't help
+### either — it only grants what the HTTP matcher requires (LIBRARIAN). Reaching this method needs
+### "Unlock with custom authorities" with a role list of LIBRARIAN, SUPERVISOR entered in the popup.
+PUT {{host}}/api/members/b0eebc99-9c0b-4ef8-bb6d-6bb9bd380a12/disable
+Authorization: Basic librarian password
