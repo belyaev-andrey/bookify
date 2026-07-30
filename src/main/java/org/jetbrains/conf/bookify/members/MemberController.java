@@ -4,6 +4,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.net.URI;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -44,9 +45,9 @@ class MemberController {
      * @return the added member
      */
     @PostMapping("")
-    ResponseEntity<Member> addMember(@RequestBody Member member) {
+    ResponseEntity<Object> addMember(@RequestBody Member member) {
         Member savedMember = memberService.addMember(member);
-        return new ResponseEntity<>(savedMember, HttpStatus.CREATED);
+        return ResponseEntity.created(URI.create("/api/members/%s".formatted(savedMember.getId()))).build();
     }
 
     /**

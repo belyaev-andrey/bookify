@@ -4,6 +4,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.net.URI;
 import java.util.List;
 import java.util.UUID;
 
@@ -35,9 +36,9 @@ class BookController {
      * @return the added book
      */
     @PostMapping("")
-    ResponseEntity<Book> addBook(@RequestBody Book book) {
+    ResponseEntity<Object> addBook(@RequestBody Book book) {
         Book savedBook = bookService.saveBook(book);
-        return new ResponseEntity<>(savedBook, HttpStatus.CREATED);
+        return ResponseEntity.created(URI.create("/api/books/%s".formatted(savedBook.getId()))).build();
     }
 
     @PutMapping("")

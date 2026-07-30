@@ -51,8 +51,7 @@ class BorrowingControllerTest {
                     .uri("/api/borrowings/borrow?bookId=" + TEST_BOOK_ID + "&memberId=" + memberId);
 
             assertThat(borrowRequestResult)
-                    .hasStatus(HttpStatus.OK)
-                    .bodyJson();
+                    .hasStatus(HttpStatus.CREATED);
 
             // Get the borrowing ID from the repository
             List<Borrowing> borrowings = borrowingRepository.findByMemberId(memberId);
@@ -107,8 +106,7 @@ class BorrowingControllerTest {
                     .uri("/api/borrowings/return?bookId=" + TEST_BOOK_ID + "&memberId=" + memberId);
 
             assertThat(returnBookResult)
-                    .hasStatus(HttpStatus.OK)
-                    .bodyJson();
+                    .hasStatus(HttpStatus.ACCEPTED);
 
             // Verify the book has been returned
             borrowing = borrowingRepository.findById(borrowingId).orElseThrow();
@@ -142,8 +140,7 @@ class BorrowingControllerTest {
                     .uri("/api/borrowings/borrow?bookId=" + nonExistentBookId + "&memberId=" + memberId);
 
             assertThat(borrowRequestResult)
-                    .hasStatus(HttpStatus.OK)
-                    .bodyJson();
+                    .hasStatus(HttpStatus.CREATED);
 
             // Get the borrowing ID from the repository
             List<Borrowing> borrowings = borrowingRepository.findByMemberId(memberId);
