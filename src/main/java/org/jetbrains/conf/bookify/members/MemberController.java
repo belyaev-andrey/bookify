@@ -23,6 +23,7 @@ class MemberController {
 
     /**
      * Get all members
+     *
      * @return a list of all members
      */
     @GetMapping("")
@@ -35,18 +36,21 @@ class MemberController {
      * Get all active members. Callers who also hold ROLE_ADMIN (on top of the LIBRARIAN role this
      * endpoint requires) get every member, disabled ones included; a plain librarian only sees the
      * active roster.
+     *
      * @return a list of members, scoped by the caller's roles
      */
     @GetMapping("/active")
     ResponseEntity<List<Member>> getAllActive(Authentication authentication) {
         boolean isAdmin = authentication.getAuthorities().stream()
-                .anyMatch(authority -> Objects.equals(authority.getAuthority(), "ROLE_ADMIN"));
+                .anyMatch(
+                        authority -> Objects.equals(authority.getAuthority(), "ROLE_ADMIN"));
         List<Member> memberList = isAdmin ? memberService.findAll() : memberService.findAllActive();
         return new ResponseEntity<>(memberList, HttpStatus.OK);
     }
 
     /**
      * Add a new member
+     *
      * @param member the member to add
      * @return the added member
      */
@@ -58,6 +62,7 @@ class MemberController {
 
     /**
      * Disable a member
+     *
      * @param id the id of the member to disable
      * @return the disabled member or 404 if not found
      */
@@ -71,6 +76,7 @@ class MemberController {
 
     /**
      * Search for members by name
+     *
      * @param name the name to search for
      * @return a list of members matching the search criteria
      */
@@ -78,7 +84,7 @@ class MemberController {
     ResponseEntity<List<Member>> searchMembers(
             @RequestParam(required = false) String name,
             @RequestParam(required = false) String email) {
-        
+
         List<Member> members;
         if (name != null && !name.isEmpty()) {
             members = memberService.searchMembersByName(name);
@@ -87,12 +93,13 @@ class MemberController {
         } else {
             members = memberService.findAll();
         }
-        
+
         return new ResponseEntity<>(members, HttpStatus.OK);
     }
 
     /**
      * Get a member by id
+     *
      * @param id the id of the member
      * @return the member or 404 if not found
      */
