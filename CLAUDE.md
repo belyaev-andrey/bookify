@@ -85,6 +85,13 @@ requires) doesn't help either — reaching this method requires "Unlock with cus
 includes `SUPERVISOR` alongside `LIBRARIAN`. `AccessDeniedException` (thrown by a denied `@PreAuthorize` check) is
 mapped to HTTP 403 by `ErrorControllerAdvice`, ahead of its catch-all `Exception` handler.
 
+`MemberController.getAllActive` demonstrates a role actually changing *execution flow*, not just gating access:
+the HTTP-level matcher for `GET /api/members/active` only ever checks `LIBRARIAN`, but the handler itself inspects
+the injected `Authentication` and takes a different branch if `ROLE_ADMIN` is also present — `memberService.findAll()`
+(every member, disabled included) instead of `memberService.findAllActive()`. Testing this by unlocking with custom
+authorities `LIBRARIAN, ADMIN` (instead of a plain `LIBRARIAN` unlock) changes the response body, not just the status
+code — one seeded member (`Alice Cooper`) is disabled specifically so the difference is visible.
+
 ### Configuration
 
 Business rules are externalized in `BookifySettingsConfig` (`@ConfigurationProperties(prefix = "bookify")`):

@@ -23,6 +23,7 @@ class MemberControllerTest {
 
     private static final String LIBRARIAN_AUTH = "Basic " + Base64.getEncoder().encodeToString("testlibrarian:password".getBytes());
     private static final String SUPERVISOR_AUTH = "Basic " + Base64.getEncoder().encodeToString("testsupervisor:password".getBytes());
+    private static final String ADMIN_AUTH = "Basic " + Base64.getEncoder().encodeToString("testadmin:password".getBytes());
 
     @Autowired
     private MockMvcTester mockMvc;
@@ -43,6 +44,33 @@ class MemberControllerTest {
         assertThat(activeRequestResult)
                 .hasStatus(HttpStatus.OK)
                 .bodyJson();
+    }
+
+    @Test
+    void testFetchAllActiveAsLibrarianExcludesDisabled() throws Exception {
+        // A plain librarian only satisfies the HTTP-level LIBRARIAN check, so getAllActive()
+        // takes the findAllActive() branch - the disabled test member is left out.
+        var activeRequestResult = mockMvc.get()
+                .uri("/api/members/active")
+                .header("Authorization", LIBRARIAN_AUTH);
+        assertThat(activeRequestResult)
+                .hasStatus(HttpStatus.OK)
+                .bodyText()
+                .doesNotContain("Alice Cooper");
+    }
+
+    @Test
+    void testFetchAllActiveAsAdminIncludesDisabled() throws Exception {
+        // testadmin holds LIBRARIAN (satisfying the same HTTP-level matcher as any librarian)
+        // plus ADMIN, which flips getAllActive() to the findAll() branch - the disabled member
+        // is included, even though the HTTP-level rule for this endpoint never mentions ADMIN.
+        var activeRequestResult = mockMvc.get()
+                .uri("/api/members/active")
+                .header("Authorization", ADMIN_AUTH);
+        assertThat(activeRequestResult)
+                .hasStatus(HttpStatus.OK)
+                .bodyText()
+                .contains("Alice Cooper");
     }
 
     @Test

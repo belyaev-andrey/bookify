@@ -2,10 +2,12 @@ package org.jetbrains.conf.bookify.members;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -30,12 +32,16 @@ class MemberController {
     }
 
     /**
-     * Get all active members
-     * @return a list of all active members
+     * Get all active members. Callers who also hold ROLE_ADMIN (on top of the LIBRARIAN role this
+     * endpoint requires) get every member, disabled ones included; a plain librarian only sees the
+     * active roster.
+     * @return a list of members, scoped by the caller's roles
      */
     @GetMapping("/active")
-    ResponseEntity<List<Member>> getAllActive() {
-        List<Member> memberList = memberService.findAllActive();
+    ResponseEntity<List<Member>> getAllActive(Authentication authentication) {
+        boolean isAdmin = authentication.getAuthorities().stream()
+                .anyMatch(authority -> Objects.equals(authority.getAuthority(), "ROLE_ADMIN"));
+        List<Member> memberList = isAdmin ? memberService.findAll() : memberService.findAllActive();
         return new ResponseEntity<>(memberList, HttpStatus.OK);
     }
 
