@@ -1,5 +1,7 @@
 package org.jetbrains.conf.bookify.members;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -15,6 +17,7 @@ import java.util.UUID;
 @RequestMapping(path = "/api/members")
 class MemberController {
 
+    private static final Logger log = LoggerFactory.getLogger(MemberController.class);
     private final MemberService memberService;
 
     MemberController(MemberService memberService) {
@@ -41,6 +44,7 @@ class MemberController {
      */
     @GetMapping("/active")
     ResponseEntity<List<Member>> getAllActive(Authentication authentication) {
+        log.info("Principal: {}", authentication.getPrincipal());
         boolean isAdmin = authentication.getAuthorities().stream()
                 .anyMatch(
                         authority -> Objects.equals(authority.getAuthority(), "ROLE_ADMIN"));
