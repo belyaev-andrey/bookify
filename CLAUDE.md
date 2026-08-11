@@ -94,10 +94,21 @@ code — one seeded member (`Alice Cooper`) is disabled specifically so the diff
 
 ### Configuration
 
-Business rules are externalized in `BookifySettingsConfig` (`@ConfigurationProperties(prefix = "bookify")`):
+Business rules are externalized in `@ConfigurationProperties` classes — see "Configuration properties" under
+Conventions for the binding rule every `bookify.*` property must follow.
 
-- `bookify.maximum.books.borrowed` — max active borrowings per member (default 5 in dev)
-- `bookify.overdue.days` — days before a borrowing is considered overdue (default 14 in dev)
+- `BookifySettingsConfig` (`@ConfigurationProperties(prefix = "bookify")`, public, in `config`, registered via
+  `BookifyApplication`'s `@EnableConfigurationProperties({...})`):
+  - `bookify.maximum.books.borrowed` — max active borrowings per member (default 5 in dev)
+  - `bookify.overdue.days` — days before a borrowing is considered overdue (default 14 in dev)
+- `PaymentProviderProperties` (`@ConfigurationProperties(prefix = "bookify.payments")`, package-private, in
+  `payments`, registered locally via `PaymentProviderConfiguration`'s `@EnableConfigurationProperties` — not added to
+  `BookifyApplication`, since `payments`' `allowedDependencies = {"events"}` blocks it from referencing `config`):
+  - `bookify.payments.provider` — `mock` (default) or `production`; also selects the active `PaymentProvider` bean
+    via `@ConditionalOnProperty` on `MockPaymentProvider`/`ProductionPaymentProvider`. Settable via env var
+    `BOOKIFY_PAYMENTS_PROVIDER`.
+  - `bookify.payments.production.base-url` / `bookify.payments.production.api-key` — used by
+    `ProductionPaymentProvider`'s HTTP client to call the external payment gateway
 
 ### Database
 
@@ -118,6 +129,23 @@ for the same tables (`V11__modulith_events.sql`).
 - The test librarian credentials are `testlibrarian:password` (loaded from test seed data)
 
 ## Conventions
+
+### Configuration properties
+
+Every `bookify.*` property must be bound to a field on a `@ConfigurationProperties` class — never read ad hoc via
+`@Value("${bookify...}")` or `Environment.getProperty(...)`. This includes properties that only exist to select
+between conditional beans (e.g. a `@ConditionalOnProperty` toggle): give them a matching bound field too, even though
+the condition itself reads the raw `Environment` value independently, so the property stays typed and discoverable
+in one place instead of only living as a string literal on an annotation.
+
+Where a property is bound depends on which module owns it:
+
+- Cross-cutting settings (used by more than one module, or with no natural module owner) go on
+  `config.BookifySettingsConfig`, registered in `BookifyApplication`'s `@EnableConfigurationProperties({...})`.
+- Module-specific settings get their own package-private `@ConfigurationProperties` class inside that module (e.g.
+  `payments.PaymentProviderProperties`), registered via a local package-private `@Configuration` class with
+  `@EnableConfigurationProperties(...)` in the same package — not added to `BookifyApplication` — whenever the
+  module's `allowedDependencies` don't permit referencing `config` directly.
 
 ### Module encapsulation
 

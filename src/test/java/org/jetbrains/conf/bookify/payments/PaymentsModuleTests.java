@@ -19,6 +19,9 @@ class PaymentsModuleTests {
     @Autowired
     private PaymentProvider paymentProvider;
 
+    @Autowired
+    private PaymentProviderProperties paymentProviderProperties;
+
     @Test
     void verifyModuleStructure() {
         ApplicationModules modules = ApplicationModules.of(BookifyApplication.class);
@@ -28,5 +31,10 @@ class PaymentsModuleTests {
     @Test
     void usesMockPaymentProviderInTestProfile() {
         assertThat(paymentProvider).isInstanceOf(MockPaymentProvider.class);
+    }
+
+    @Test
+    void bindsProviderPropertyFromConfiguration() {
+        assertThat(paymentProviderProperties.getProvider()).isEqualTo(PaymentProviderProperties.Provider.MOCK);
     }
 }

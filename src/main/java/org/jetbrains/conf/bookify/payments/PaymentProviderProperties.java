@@ -5,7 +5,16 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 @ConfigurationProperties(prefix = "bookify.payments")
 class PaymentProviderProperties {
 
+    private Provider provider = Provider.MOCK;
     private Production production = new Production();
+
+    Provider getProvider() {
+        return provider;
+    }
+
+    void setProvider(Provider provider) {
+        this.provider = provider;
+    }
 
     Production getProduction() {
         return production;
@@ -13,6 +22,10 @@ class PaymentProviderProperties {
 
     void setProduction(Production production) {
         this.production = production;
+    }
+
+    enum Provider {
+        MOCK, PRODUCTION
     }
 
     static class Production {
