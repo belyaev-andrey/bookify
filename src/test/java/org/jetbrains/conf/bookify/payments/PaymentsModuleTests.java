@@ -22,10 +22,18 @@ class PaymentsModuleTests {
     @Autowired
     private PaymentProviderProperties paymentProviderProperties;
 
+    @Autowired
+    private PaymentsAPI paymentsAPI;
+
     @Test
     void verifyModuleStructure() {
         ApplicationModules modules = ApplicationModules.of(BookifyApplication.class);
         modules.getModuleByName("payments").orElseThrow();
+    }
+
+    @Test
+    void paymentsApiIsExposedAsPublicApi() {
+        assertThat(paymentsAPI).isNotNull();
     }
 
     @Test
