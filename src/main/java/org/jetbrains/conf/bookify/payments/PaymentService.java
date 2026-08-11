@@ -18,9 +18,11 @@ class PaymentService {
     private static final Logger log = LoggerFactory.getLogger(PaymentService.class);
 
     private final BookFineRateRepository fineRateRepository;
+    private final PaymentProvider paymentProvider;
 
-    PaymentService(BookFineRateRepository fineRateRepository) {
+    PaymentService(BookFineRateRepository fineRateRepository, PaymentProvider paymentProvider) {
         this.fineRateRepository = fineRateRepository;
+        this.paymentProvider = paymentProvider;
     }
 
     @ApplicationModuleListener
@@ -28,9 +30,20 @@ class PaymentService {
         log.info("Processing fine for member {}, book {} — {} day(s) overdue",
                 event.memberId(), event.bookId(), event.overdueInDays());
 
-        Optional<BookFineRateEntity> rateOpt =
-                fineRateRepository.findApplicableRate(event.bookId(), LocalDate.now());
+        fineRateRepository.findApplicableRate(event.bookId(), LocalDate.now())
+                .ifPresentOrElse(
+                        rate -> chargeFine(event, rate),
+                        () -> log.warn("No fine rate configured for book {}; skipping charge", event.bookId()));
+    }
 
+    private void chargeFine(AssignFineEvent event, BookFineRateEntity rate) {
+        BigDecimal amount = rate.getPricePerDayOverdue().multiply(BigDecimal.valueOf(event.overdueInDays()));
+        PaymentResult result = paymentProvider.charge(new PaymentRequest(event.memberId(), event.bookId(), amount));
+        if (result.successful()) {
+            log.info("Charged {} to member {} (transaction {})", amount, event.memberId(), result.transactionId());
+        } else {
+            log.warn("Failed to charge {} to member {}: {}", amount, event.memberId(), result.message());
+        }
     }
 
     @Transactional
