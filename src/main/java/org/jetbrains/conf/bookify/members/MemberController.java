@@ -19,9 +19,11 @@ class MemberController {
 
     private static final Logger log = LoggerFactory.getLogger(MemberController.class);
     private final MemberService memberService;
+    private final MemberMapper memberMapper;
 
-    MemberController(MemberService memberService) {
+    MemberController(MemberService memberService, MemberMapper memberMapper) {
         this.memberService = memberService;
+        this.memberMapper = memberMapper;
     }
 
     /**
@@ -30,9 +32,9 @@ class MemberController {
      * @return a list of all members
      */
     @GetMapping("")
-    ResponseEntity<List<Member>> getAll() {
+    ResponseEntity<List<MemberResponse>> getAll() {
         List<Member> memberList = memberService.findAll();
-        return new ResponseEntity<>(memberList, HttpStatus.OK);
+        return new ResponseEntity<>(memberMapper.toResponseList(memberList), HttpStatus.OK);
     }
 
     /**
@@ -43,24 +45,24 @@ class MemberController {
      * @return a list of members, scoped by the caller's roles
      */
     @GetMapping("/active")
-    ResponseEntity<List<Member>> getAllActive(Authentication authentication) {
+    ResponseEntity<List<MemberResponse>> getAllActive(Authentication authentication) {
         log.info("Principal: {}", authentication.getPrincipal());
         boolean isAdmin = authentication.getAuthorities().stream()
                 .anyMatch(
                         authority -> Objects.equals(authority.getAuthority(), "ROLE_ADMIN"));
         List<Member> memberList = isAdmin ? memberService.findAll() : memberService.findAllActive();
-        return new ResponseEntity<>(memberList, HttpStatus.OK);
+        return new ResponseEntity<>(memberMapper.toResponseList(memberList), HttpStatus.OK);
     }
 
     /**
      * Add a new member
      *
-     * @param member the member to add
+     * @param request the member to add
      * @return the added member
      */
     @PostMapping("")
-    ResponseEntity<Object> addMember(@RequestBody Member member) {
-        Member savedMember = memberService.addMember(member);
+    ResponseEntity<Object> addMember(@RequestBody MemberRequest request) {
+        Member savedMember = memberService.addMember(memberMapper.toEntity(request));
         return ResponseEntity.created(URI.create("/api/members/%s".formatted(savedMember.getId()))).build();
     }
 
@@ -71,10 +73,10 @@ class MemberController {
      * @return the disabled member or 404 if not found
      */
     @PutMapping("/{id}/disable")
-    ResponseEntity<Member> disableMember(@PathVariable UUID id) {
+    ResponseEntity<MemberResponse> disableMember(@PathVariable UUID id) {
         Optional<Member> disabledMember = memberService.disableMember(id);
         return disabledMember
-                .map(member -> new ResponseEntity<>(member, HttpStatus.OK))
+                .map(member -> new ResponseEntity<>(memberMapper.toResponse(member), HttpStatus.OK))
                 .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
 
@@ -85,7 +87,7 @@ class MemberController {
      * @return a list of members matching the search criteria
      */
     @GetMapping("/search")
-    ResponseEntity<List<Member>> searchMembers(
+    ResponseEntity<List<MemberResponse>> searchMembers(
             @RequestParam(required = false) String name,
             @RequestParam(required = false) String email) {
 
@@ -98,7 +100,7 @@ class MemberController {
             members = memberService.findAll();
         }
 
-        return new ResponseEntity<>(members, HttpStatus.OK);
+        return new ResponseEntity<>(memberMapper.toResponseList(members), HttpStatus.OK);
     }
 
     /**
@@ -108,10 +110,10 @@ class MemberController {
      * @return the member or 404 if not found
      */
     @GetMapping("/{id}")
-    ResponseEntity<Member> getMemberById(@PathVariable UUID id) {
+    ResponseEntity<MemberResponse> getMemberById(@PathVariable UUID id) {
         Optional<Member> member = memberService.findById(id);
         return member
-                .map(m -> new ResponseEntity<>(m, HttpStatus.OK))
+                .map(m -> new ResponseEntity<>(memberMapper.toResponse(m), HttpStatus.OK))
                 .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
 }

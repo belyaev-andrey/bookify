@@ -12,9 +12,11 @@ import java.util.UUID;
 class BorrowingController {
 
     private final BorrowingService borrowingService;
+    private final BorrowingMapper borrowingMapper;
 
-    BorrowingController(BorrowingService borrowingService) {
+    BorrowingController(BorrowingService borrowingService, BorrowingMapper borrowingMapper) {
         this.borrowingService = borrowingService;
+        this.borrowingMapper = borrowingMapper;
     }
 
     /**
@@ -23,8 +25,8 @@ class BorrowingController {
      * @return a ResponseEntity containing a list of all borrowings
      */
     @GetMapping(value = "")
-    public ResponseEntity<List<Borrowing>> getAll() {
-        return ResponseEntity.ok(borrowingService.findAll());
+    public ResponseEntity<List<BorrowingResponse>> getAll() {
+        return ResponseEntity.ok(borrowingMapper.toResponseList(borrowingService.findAll()));
     }
     
     /**
@@ -46,8 +48,9 @@ class BorrowingController {
      * @return the borrowing request if found, 404 otherwise
      */
     @GetMapping("/{borrowingId}")
-    ResponseEntity<Borrowing> getBorrowingById(@PathVariable UUID borrowingId) {
+    ResponseEntity<BorrowingResponse> getBorrowingById(@PathVariable UUID borrowingId) {
         return borrowingService.getBorrowingById(borrowingId)
+                .map(borrowingMapper::toResponse)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
@@ -72,8 +75,8 @@ class BorrowingController {
      * @return a list of borrowings for the member
      */
     @GetMapping("/member/{memberId}")
-    List<Borrowing> getBorrowingsForMember(@PathVariable UUID memberId) {
-        return borrowingService.getBorrowingsForMember(memberId);
+    List<BorrowingResponse> getBorrowingsForMember(@PathVariable UUID memberId) {
+        return borrowingMapper.toResponseList(borrowingService.getBorrowingsForMember(memberId));
     }
 
     /**
@@ -82,7 +85,7 @@ class BorrowingController {
      * @return a list of active borrowings for the member
      */
     @GetMapping("/member/{memberId}/active")
-    List<Borrowing> getActiveBorrowingsForMember(@PathVariable UUID memberId) {
-        return borrowingService.getActiveBorrowingsForMember(memberId);
+    List<BorrowingResponse> getActiveBorrowingsForMember(@PathVariable UUID memberId) {
+        return borrowingMapper.toResponseList(borrowingService.getActiveBorrowingsForMember(memberId));
     }
 }

@@ -13,9 +13,11 @@ import java.util.UUID;
 class BookController {
 
     private final BookService bookService;
+    private final BookMapper bookMapper;
 
-    BookController(BookService bookService) {
+    BookController(BookService bookService, BookMapper bookMapper) {
         this.bookService = bookService;
+        this.bookMapper = bookMapper;
     }
 
     /**
@@ -24,27 +26,27 @@ class BookController {
      * @return a list of all books
      */
     @GetMapping("")
-    ResponseEntity<List<Book>> getAll() {
+    ResponseEntity<List<BookResponse>> getAll() {
         List<Book> bookList = bookService.findAll();
-        return new ResponseEntity<>(bookList, HttpStatus.OK);
+        return new ResponseEntity<>(bookMapper.toResponseList(bookList), HttpStatus.OK);
     }
 
     /**
      * Add a book to the catalogue
      *
-     * @param book the book to add
+     * @param request the book to add
      * @return the added book
      */
     @PostMapping("")
-    ResponseEntity<Object> addBook(@RequestBody Book book) {
-        Book savedBook = bookService.saveBook(book);
+    ResponseEntity<Object> addBook(@RequestBody BookRequest request) {
+        Book savedBook = bookService.saveBook(bookMapper.toEntity(request));
         return ResponseEntity.created(URI.create("/api/books/%s".formatted(savedBook.getId()))).build();
     }
 
     @PutMapping("")
-    public ResponseEntity<Book> updateBook(@RequestBody Book book) {
-        return bookService.findById(book.getId())
-                .map(b -> ResponseEntity.ok(bookService.saveBook(book)))
+    public ResponseEntity<BookResponse> updateBook(@RequestBody BookUpdateRequest request) {
+        return bookService.findById(request.id())
+                .map(b -> ResponseEntity.ok(bookMapper.toResponse(bookService.saveBook(bookMapper.toEntity(request)))))
                 .orElse(ResponseEntity.notFound().build());
     }
 
@@ -61,8 +63,9 @@ class BookController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Book> findById(@PathVariable UUID id) {
+    public ResponseEntity<BookResponse> findById(@PathVariable UUID id) {
         return bookService.findById(id)
+                .map(bookMapper::toResponse)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
@@ -74,8 +77,8 @@ class BookController {
      * @return a list of books matching the search criteria
      */
     @GetMapping("/search")
-    ResponseEntity<List<Book>> searchBooksByName(@RequestParam String name) {
+    ResponseEntity<List<BookResponse>> searchBooksByName(@RequestParam String name) {
         List<Book> books = bookService.searchBooksByName(name);
-        return new ResponseEntity<>(books, HttpStatus.OK);
+        return new ResponseEntity<>(bookMapper.toResponseList(books), HttpStatus.OK);
     }
 }
