@@ -175,3 +175,7 @@ Using Spring Modulith in this application provides several benefits:
 4. **Evolutionary Architecture**
    - Modules can evolve independently
    - The application can be refactored or extended more easily
+
+## License
+
+Licensed under the [Apache License, Version 2.0](LICENSE).

@@ -13,6 +13,13 @@
     <version>0.0.1-SNAPSHOT</version>
     <name>bookify</name>
     <description>bookify</description>
+    <licenses>
+        <license>
+            <name>Apache-2.0</name>
+            <url>https://www.apache.org/licenses/LICENSE-2.0.txt</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
     <repositories>
         <repository>
             <id>spring-milestones</id>
