@@ -14,10 +14,10 @@ class BookFineRateEntityTest {
     private static final UUID BOOK_ID = UUID.fromString("a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11");
 
     @Test
-    void create_setsFieldsAndGeneratesId() {
+    void create_setsFieldsAndIsTransient() {
         BookFineRateEntity entity = BookFineRateEntity.create(BOOK_ID, new BigDecimal("0.50"), LocalDate.of(2024, 1, 1));
 
-        assertThat(entity.getId()).isNotNull();
+        assertThat(entity.getId()).isNull();
         assertThat(entity.getBookId()).isEqualTo(BOOK_ID);
         assertThat(entity.getPricePerDayOverdue()).isEqualByComparingTo("0.50");
         assertThat(entity.getEffectiveDate()).isEqualTo(LocalDate.of(2024, 1, 1));
@@ -57,14 +57,5 @@ class BookFineRateEntityTest {
         assertThatIllegalArgumentException()
                 .isThrownBy(() -> BookFineRateEntity.create(BOOK_ID, new BigDecimal("0.50"), null))
                 .withMessageContaining("effectiveDate");
-    }
-
-    @Test
-    void persistenceConstructor_reconstructsExistingEntityAsNotNew() {
-        UUID id = UUID.randomUUID();
-        BookFineRateEntity entity = new BookFineRateEntity(id, BOOK_ID, new BigDecimal("1.25"), LocalDate.of(2024, 6, 1));
-
-        assertThat(entity.getId()).isEqualTo(id);
-        assertThat(entity.isNew()).isFalse();
     }
 }

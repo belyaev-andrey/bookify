@@ -1,10 +1,12 @@
 package org.jetbrains.conf.bookify.books;
 
+import jakarta.persistence.EntityManager;
 import org.jetbrains.conf.bookify.events.BookAvailabilityCheckedEvent;
 import org.jetbrains.conf.bookify.events.BookBorrowRequestEvent;
 import org.jetbrains.conf.bookify.events.BookReturnedEvent;
 import org.jspecify.annotations.Nullable;
 import org.springframework.context.ApplicationEventPublisher;
+import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Sort;
 import org.springframework.modulith.events.ApplicationModuleListener;
@@ -23,10 +25,12 @@ class BookService {
 
     private final BookRepository bookRepository;
     private final ApplicationEventPublisher eventPublisher;
+    private final EntityManager entityManager;
 
-    BookService(BookRepository bookRepository, ApplicationEventPublisher eventPublisher) {
+    BookService(BookRepository bookRepository, ApplicationEventPublisher eventPublisher, EntityManager entityManager) {
         this.bookRepository = bookRepository;
         this.eventPublisher = eventPublisher;
+        this.entityManager = entityManager;
     }
 
     /**
@@ -49,7 +53,8 @@ class BookService {
     void removeBook(UUID id) {
         try {
             bookRepository.deleteById(id);
-        } catch (DataIntegrityViolationException e) {
+            entityManager.flush();
+        } catch (DataIntegrityViolationException | ConstraintViolationException e) {
             throw new BookDeleteException(id, e);
         }
     }

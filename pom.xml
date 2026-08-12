@@ -228,7 +228,7 @@
                     <compilerArgs>
                         <arg>-XDcompilePolicy=simple</arg>
                         <arg>--should-stop=ifError=FLOW</arg>
-                        <arg>-Xplugin:ErrorProne -Xep:NullAway:ERROR -XepOpt:NullAway:AnnotatedPackages=org.jetbrains.conf.bookify -XepOpt:NullAway:JSpecifyMode=true</arg>
+                        <arg>-Xplugin:ErrorProne -Xep:NullAway:ERROR -XepOpt:NullAway:AnnotatedPackages=org.jetbrains.conf.bookify -XepOpt:NullAway:JSpecifyMode=true -XepExcludedPaths:.*/generated-sources/.*</arg>
                     </compilerArgs>
                 </configuration>
             </plugin>

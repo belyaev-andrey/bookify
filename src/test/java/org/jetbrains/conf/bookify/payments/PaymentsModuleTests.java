@@ -28,7 +28,7 @@ class PaymentsModuleTests {
     @Test
     void verifyModuleStructure() {
         ApplicationModules modules = ApplicationModules.of(BookifyApplication.class);
-        modules.getModuleByName("payments").orElseThrow();
+        assertThat(modules.getModuleByName("payments")).isPresent();
     }
 
     @Test
