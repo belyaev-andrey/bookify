@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                    http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet id="test-003-payment-test-data" author="bookify">
+        <comment>
+            Fine rate history for "The Lord of the Rings" (a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11):
+            three consecutive rates, so tests can exercise picking the most recent rate not after a given date.
+        </comment>
+        <insert tableName="book_fine_rate">
+            <column name="id" value="c0eebc99-9c0b-4ef8-bb6d-6bb9bd380a01"/>
+            <column name="book_id" value="a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11"/>
+            <column name="price_per_day_overdue" valueNumeric="0.50"/>
+            <column name="effective_date" valueDate="2024-01-01"/>
+        </insert>
+        <insert tableName="book_fine_rate">
+            <column name="id" value="c0eebc99-9c0b-4ef8-bb6d-6bb9bd380a02"/>
+            <column name="book_id" value="a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11"/>
+            <column name="price_per_day_overdue" valueNumeric="0.75"/>
+            <column name="effective_date" valueDate="2024-06-01"/>
+        </insert>
+        <insert tableName="book_fine_rate">
+            <column name="id" value="c0eebc99-9c0b-4ef8-bb6d-6bb9bd380a03"/>
+            <column name="book_id" value="a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11"/>
+            <column name="price_per_day_overdue" valueNumeric="1.00"/>
+            <column name="effective_date" valueDate="2024-09-01"/>
+        </insert>
+    </changeSet>
+
+    <changeSet id="test-003-future-payment-test-data" author="bookify">
+        <comment>A rate that only takes effect in the future, for "1984" (a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a12).</comment>
+        <insert tableName="book_fine_rate">
+            <column name="id" value="c0eebc99-9c0b-4ef8-bb6d-6bb9bd380a04"/>
+            <column name="book_id" value="a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a12"/>
+            <column name="price_per_day_overdue" valueNumeric="2.00"/>
+            <column name="effective_date" valueDate="2030-01-01"/>
+        </insert>
+    </changeSet>
+
+    <!-- "To Kill a Mockingbird" (a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a13) intentionally has no fine rate configured. -->
+
+</databaseChangeLog>

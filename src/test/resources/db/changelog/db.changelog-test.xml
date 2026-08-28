@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                    http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <include file="db/changelog/db.changelog-master.xml" relativeToChangelogFile="false"/>
+
+    <include file="test-data/001-test-data.xml" relativeToChangelogFile="true"/>
+    <include file="test-data/002-admin-role-test-data.xml" relativeToChangelogFile="true"/>
+    <include file="test-data/003-payment-test-data.xml" relativeToChangelogFile="true"/>
+
+</databaseChangeLog>

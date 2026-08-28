@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                    http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet id="002-books-data" author="bookify" context="dev">
+        <insert tableName="book">
+            <column name="id" value="a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11"/>
+            <column name="name" value="The Lord of the Rings"/>
+            <column name="isbn" value="9780618640157"/>
+        </insert>
+        <insert tableName="book">
+            <column name="id" value="a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a12"/>
+            <column name="name" value="1984"/>
+            <column name="isbn" value="9780451524935"/>
+        </insert>
+        <insert tableName="book">
+            <column name="id" value="a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a13"/>
+            <column name="name" value="To Kill a Mockingbird"/>
+            <column name="isbn" value="9780446310789"/>
+        </insert>
+        <insert tableName="book">
+            <column name="id" value="a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a14"/>
+            <column name="name" value="The Catcher in the Rye"/>
+            <column name="isbn" value="9780316769488"/>
+        </insert>
+        <insert tableName="book">
+            <column name="id" value="a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a15"/>
+            <column name="name" value="Pride and Prejudice"/>
+            <column name="isbn" value="9780141439518"/>
+        </insert>
+    </changeSet>
+
+</databaseChangeLog>

@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                    http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <include file="001-books.xml" relativeToChangelogFile="true"/>
+    <include file="002-books-data.xml" relativeToChangelogFile="true"/>
+    <include file="003-members.xml" relativeToChangelogFile="true"/>
+    <include file="004-members-data.xml" relativeToChangelogFile="true"/>
+    <include file="005-borrowing.xml" relativeToChangelogFile="true"/>
+    <include file="006-employee.xml" relativeToChangelogFile="true"/>
+    <include file="007-borrowing-and-employee-data.xml" relativeToChangelogFile="true"/>
+    <include file="008-security.xml" relativeToChangelogFile="true"/>
+    <include file="009-users-and-roles-data.xml" relativeToChangelogFile="true"/>
+    <include file="010-modulith-events.xml" relativeToChangelogFile="true"/>
+    <include file="011-inactive-member-data.xml" relativeToChangelogFile="true"/>
+    <include file="012-payments.xml" relativeToChangelogFile="true"/>
+
+</databaseChangeLog>

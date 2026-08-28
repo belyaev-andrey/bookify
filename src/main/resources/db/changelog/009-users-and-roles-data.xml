@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                    http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet id="009-users-and-roles-data" author="bookify" context="dev">
+        <comment>Default librarian user (password is 'password' encoded with BCrypt)</comment>
+        <insert tableName="users">
+            <column name="username" value="librarian"/>
+            <column name="password" value="$2a$10$YKyJ5KAYVg7lbwoIzvtXOOxe2VPEvat7IY4AkgQp2mPnZjZw6.58C"/>
+            <column name="enabled" valueBoolean="true"/>
+        </insert>
+        <insert tableName="authorities">
+            <column name="username" value="librarian"/>
+            <column name="authority" value="ROLE_LIBRARIAN"/>
+        </insert>
+    </changeSet>
+
+</databaseChangeLog>

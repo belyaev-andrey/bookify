@@ -1,3 +1,0 @@
-INSERT INTO member (id, name, email, password, enabled) VALUES ('b0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11', 'John Doe', 'john.doe@example.com', 'password123', true);
-INSERT INTO member (id, name, email, password, enabled) VALUES ('b0eebc99-9c0b-4ef8-bb6d-6bb9bd380a12', 'Jane Smith', 'jane.smith@example.com', 'password456', true);
-INSERT INTO member (id, name, email, password, enabled) VALUES ('b0eebc99-9c0b-4ef8-bb6d-6bb9bd380a13', 'Bob Johnson', 'bob.johnson@example.com', 'password789', true);

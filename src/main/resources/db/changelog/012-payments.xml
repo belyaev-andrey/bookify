@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                    http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet id="012-payments" author="bookify">
+        <createTable tableName="book_fine_rate">
+            <column name="id" type="UUID">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="book_id" type="UUID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="price_per_day_overdue" type="NUMERIC(10, 2)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="effective_date" type="DATE">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <!-- No native Liquibase change type covers CHECK constraints; this stays as raw SQL. -->
+        <sql>
+            ALTER TABLE book_fine_rate
+                ADD CONSTRAINT chk_price_non_negative CHECK (price_per_day_overdue >= 0);
+        </sql>
+    </changeSet>
+
+</databaseChangeLog>

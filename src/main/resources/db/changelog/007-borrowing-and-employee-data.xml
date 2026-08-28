@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                    http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet id="007-borrowing-and-employee-data" author="bookify" context="dev">
+        <insert tableName="employee">
+            <column name="organization" value="LIBRARY"/>
+            <column name="employee_number" valueNumeric="101"/>
+            <column name="name" value="Eleanor Vance"/>
+            <column name="birth_date" valueDate="1985-03-12"/>
+            <column name="email" value="evance@mail.com"/>
+        </insert>
+        <insert tableName="employee">
+            <column name="organization" value="SCIENCE"/>
+            <column name="employee_number" valueNumeric="201"/>
+            <column name="name" value="Caleb Hayes"/>
+            <column name="birth_date" valueDate="1992-07-21"/>
+            <column name="email" value="chayes@mail.com"/>
+        </insert>
+        <insert tableName="employee">
+            <column name="organization" value="ACADEMY"/>
+            <column name="employee_number" valueNumeric="301"/>
+            <column name="name" value="Isla Bennett"/>
+            <column name="birth_date" valueDate="1988-11-02"/>
+            <column name="email" value="ibennett@mail.com"/>
+        </insert>
+
+        <insert tableName="borrowing">
+            <column name="id" value="550e8400-e29b-41d4-a716-446655440002"/>
+            <column name="book_id" value="a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a12"/>
+            <column name="requested_book_id" value="a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a12"/>
+            <column name="member_id" value="b0eebc99-9c0b-4ef8-bb6d-6bb9bd380a12"/>
+            <column name="borrow_date" valueDate="2024-01-10T14:15:00"/>
+            <column name="return_date" valueDate="2024-01-20T16:45:00"/>
+            <column name="status" value="RETURNED"/>
+            <column name="employee_organization" value="SCIENCE"/>
+            <column name="employee_number" valueNumeric="201"/>
+        </insert>
+        <insert tableName="borrowing">
+            <column name="id" value="550e8400-e29b-41d4-a716-446655440003"/>
+            <column name="requested_book_id" value="a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a13"/>
+            <column name="member_id" value="b0eebc99-9c0b-4ef8-bb6d-6bb9bd380a13"/>
+            <column name="borrow_date" valueDate="2024-01-18T09:00:00"/>
+            <column name="status" value="PENDING"/>
+            <column name="employee_organization" value="ACADEMY"/>
+            <column name="employee_number" valueNumeric="301"/>
+        </insert>
+    </changeSet>
+
+</databaseChangeLog>

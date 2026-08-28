@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                    http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <!-- A disabled member, seeded so GET /api/members/active has something to omit for a plain
+         LIBRARIAN but include for a caller who also holds ROLE_ADMIN (see MemberController.getAllActive). -->
+    <changeSet id="011-inactive-member-data" author="bookify" context="dev">
+        <insert tableName="member">
+            <column name="id" value="b0eebc99-9c0b-4ef8-bb6d-6bb9bd380a14"/>
+            <column name="name" value="Alice Cooper"/>
+            <column name="email" value="alice.cooper@example.com"/>
+            <column name="password" value="passwordabc"/>
+            <column name="enabled" valueBoolean="false"/>
+        </insert>
+    </changeSet>
+
+</databaseChangeLog>

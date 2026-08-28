@@ -112,12 +112,26 @@ Conventions for the binding rule every `bookify.*` property must follow.
 
 ### Database
 
-Flyway manages schema migrations in `src/main/resources/db/migration/`. The dev profile also loads seed data from
-`src/main/resources/data/`. Tests use `src/test/resources/test-data/`.
+Liquibase manages schema migrations as XML changelogs in `src/main/resources/db/changelog/`. Every migration is its
+own file, numbered in execution order (`001-books.xml`, `002-books-data.xml`, ...), and the main changelog
+(`db.changelog-master.xml`) includes each of them via `<include>`. Structural changesets have no context and always
+run regardless of the active context; seed-data changesets are tagged `context="dev"`.
+
+Liquibase's context filter only *excludes* something when the active contexts are non-empty and don't match — leaving
+`spring.liquibase.contexts` unset runs every changeset, tagged or not. So every profile sets an explicit context:
+`application.properties` sets `spring.liquibase.contexts=prod` (inherited by `prod` and any no-profile run), which
+doesn't match `dev`, so the dev-tagged seed changesets are skipped there; `application-dev.properties` overrides it to
+`dev`, activating them.
+
+Tests use a separate changelog, `src/test/resources/db/changelog/db.changelog-test.xml`, which `<include>`s the main
+changelog followed by the test-only changesets in `src/test/resources/db/changelog/test-data/` (converted from the
+former `test-data` seed scripts, left untagged since the test changelog doesn't reference the dev one).
+`application-test.properties` points `spring.liquibase.change-log` at this file and sets
+`spring.liquibase.contexts=test`, so dev-context seed data is never pulled in during tests.
 
 Spring Modulith's event outbox uses `event_publication` and `event_publication_archive` tables. This branch creates
-them via an explicit Flyway migration (`V11__modulith_events.sql`), applied in both `test` and `dev`. The `main`
-branch has no such migration and instead relies on
+them via an explicit changelog (`010-modulith-events.xml`), which — being structural and context-free — is applied
+in every profile, including `test` and `dev`. The `main` branch has no such migration and instead relies on
 `spring.modulith.events.jdbc.schema-initialization.enabled` — explicitly set in its `application-test.properties`,
 but commented out in `application-dev.properties`, so check it there before relying on durable event publication
 outside tests.
@@ -179,4 +193,7 @@ Example: `feat(books): add ISBN validation for book creation`
 
 ### Database migrations
 
-Never modify existing migration scripts. Always add new versioned scripts (`V<n>__description.sql`).
+Never modify existing changelog files. Always add a new XML file under `src/main/resources/db/changelog/` (or, for
+test-only data, `src/test/resources/db/changelog/test-data/`), numbered after the last one, and add an `<include>`
+for it to the appropriate master changelog (`db.changelog-master.xml` or `db.changelog-test.xml`). Seed-data
+changesets that shouldn't run in `prod` must be tagged `context="dev"`.

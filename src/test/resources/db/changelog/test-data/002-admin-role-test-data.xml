@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                    http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet id="test-002-admin-role-test-data" author="bookify">
+        <comment>
+            Test user holding ROLE_ADMIN in addition to ROLE_LIBRARIAN, for MemberController.getAllActive's
+            role-based branch: a plain librarian only sees active members, but a caller who also holds
+            ROLE_ADMIN sees every member, including disabled ones.
+        </comment>
+        <insert tableName="users">
+            <column name="username" value="testadmin"/>
+            <column name="password" value="$2a$10$YKyJ5KAYVg7lbwoIzvtXOOxe2VPEvat7IY4AkgQp2mPnZjZw6.58C"/>
+            <column name="enabled" valueBoolean="true"/>
+        </insert>
+        <insert tableName="authorities">
+            <column name="username" value="testadmin"/>
+            <column name="authority" value="ROLE_LIBRARIAN"/>
+        </insert>
+        <insert tableName="authorities">
+            <column name="username" value="testadmin"/>
+            <column name="authority" value="ROLE_ADMIN"/>
+        </insert>
+    </changeSet>
+
+    <changeSet id="test-002-inactive-member-test-data" author="bookify">
+        <comment>A disabled member for the same test, mirroring the dev-profile seed data.</comment>
+        <insert tableName="member">
+            <column name="id" value="b0eebc99-9c0b-4ef8-bb6d-6bb9bd380a14"/>
+            <column name="name" value="Alice Cooper"/>
+            <column name="email" value="alice.cooper@example.com"/>
+            <column name="password" value="passwordabc"/>
+            <column name="enabled" valueBoolean="false"/>
+        </insert>
+    </changeSet>
+
+</databaseChangeLog>

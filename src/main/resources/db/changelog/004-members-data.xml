@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                    http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet id="004-members-data" author="bookify" context="dev">
+        <insert tableName="member">
+            <column name="id" value="b0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11"/>
+            <column name="name" value="John Doe"/>
+            <column name="email" value="john.doe@example.com"/>
+            <column name="password" value="password123"/>
+            <column name="enabled" valueBoolean="true"/>
+        </insert>
+        <insert tableName="member">
+            <column name="id" value="b0eebc99-9c0b-4ef8-bb6d-6bb9bd380a12"/>
+            <column name="name" value="Jane Smith"/>
+            <column name="email" value="jane.smith@example.com"/>
+            <column name="password" value="password456"/>
+            <column name="enabled" valueBoolean="true"/>
+        </insert>
+        <insert tableName="member">
+            <column name="id" value="b0eebc99-9c0b-4ef8-bb6d-6bb9bd380a13"/>
+            <column name="name" value="Bob Johnson"/>
+            <column name="email" value="bob.johnson@example.com"/>
+            <column name="password" value="password789"/>
+            <column name="enabled" valueBoolean="true"/>
+        </insert>
+    </changeSet>
+
+</databaseChangeLog>

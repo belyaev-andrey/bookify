@@ -123,7 +123,7 @@ The application uses a PostgreSQL database with the following tables:
    - `price_per_day_overdue` (numeric(10,2))
    - `effective_date` (date)
 
-Database migrations are managed using Flyway, with migration scripts in the `src/main/resources/db/migration` directory.
+Database migrations are managed using Liquibase, with XML changelogs in the `src/main/resources/db/changelog` directory.
 
 ### Docker Setup
 
