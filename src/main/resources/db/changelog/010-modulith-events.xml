@@ -35,7 +35,9 @@
                     CHECK ((status)::text = ANY
                            ((ARRAY ['PUBLISHED'::character varying, 'PROCESSING'::character varying, 'COMPLETED'::character varying, 'FAILED'::character varying, 'RESUBMITTED'::character varying])::text[]));
         </sql>
+    </changeSet>
 
+    <changeSet id="010-modulith-events-archive" author="bookify">
         <createTable tableName="event_publication_archive">
             <column name="id" type="UUID">
                 <constraints primaryKey="true" nullable="false" primaryKeyName="pk_event_publication_archive"/>

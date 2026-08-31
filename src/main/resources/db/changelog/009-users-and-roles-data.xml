@@ -4,13 +4,16 @@
                     xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
                     http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
 
-    <changeSet id="009-users-and-roles-data" author="bookify" context="dev">
+    <changeSet id="009-users-data" author="bookify" context="dev">
         <comment>Default librarian user (password is 'password' encoded with BCrypt)</comment>
         <insert tableName="users">
             <column name="username" value="librarian"/>
             <column name="password" value="$2a$10$YKyJ5KAYVg7lbwoIzvtXOOxe2VPEvat7IY4AkgQp2mPnZjZw6.58C"/>
             <column name="enabled" valueBoolean="true"/>
         </insert>
+    </changeSet>
+
+    <changeSet id="009-roles-data" author="bookify" context="dev">
         <insert tableName="authorities">
             <column name="username" value="librarian"/>
             <column name="authority" value="ROLE_LIBRARIAN"/>

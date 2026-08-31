@@ -4,7 +4,7 @@
                     xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
                     http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
 
-    <changeSet id="007-borrowing-and-employee-data" author="bookify" context="dev">
+    <changeSet id="007-employee-data" author="bookify" context="dev">
         <insert tableName="employee">
             <column name="organization" value="LIBRARY"/>
             <column name="employee_number" valueNumeric="101"/>
@@ -26,7 +26,9 @@
             <column name="birth_date" valueDate="1988-11-02"/>
             <column name="email" value="ibennett@mail.com"/>
         </insert>
+    </changeSet>
 
+    <changeSet id="007-borrowing-data" author="bookify" context="dev">
         <insert tableName="borrowing">
             <column name="id" value="550e8400-e29b-41d4-a716-446655440002"/>
             <column name="book_id" value="a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a12"/>

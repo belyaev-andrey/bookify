@@ -14,7 +14,9 @@
         </createTable>
         <addPrimaryKey tableName="employee" columnNames="employee_number, organization"
                         constraintName="employee_pk"/>
+    </changeSet>
 
+    <changeSet id="006-borrowing-employee-fk" author="bookify">
         <addColumn tableName="borrowing">
             <column name="employee_organization" type="VARCHAR(20)"/>
             <column name="employee_number" type="INT"/>

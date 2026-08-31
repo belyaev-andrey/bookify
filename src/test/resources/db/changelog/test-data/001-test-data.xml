@@ -138,10 +138,8 @@
         </insert>
     </changeSet>
 
-    <changeSet id="test-001-borrowing-extra" author="bookify">
-        <comment>Additional test data for borrowing service tests, covering various statuses and scenarios</comment>
-
-        <!-- APPROVED borrowings with active loans (not yet returned) -->
+    <changeSet id="test-001-borrowing-active-loans" author="bookify">
+        <comment>APPROVED borrowings with active loans (not yet returned)</comment>
         <insert tableName="borrowing">
             <column name="id" value="550e8400-e29b-41d4-a716-446655440010"/>
             <column name="book_id" value="a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11"/>
@@ -172,8 +170,10 @@
             <column name="employee_organization" value="SCIENCE"/>
             <column name="employee_number" valueNumeric="201"/>
         </insert>
+    </changeSet>
 
-        <!-- RETURNED borrowings with completed returns -->
+    <changeSet id="test-001-borrowing-returned" author="bookify">
+        <comment>RETURNED borrowings with completed returns</comment>
         <insert tableName="borrowing">
             <column name="id" value="550e8400-e29b-41d4-a716-446655440013"/>
             <column name="book_id" value="a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a13"/>
@@ -207,8 +207,10 @@
             <column name="employee_organization" value="SCIENCE"/>
             <column name="employee_number" valueNumeric="201"/>
         </insert>
+    </changeSet>
 
-        <!-- PENDING borrowings (awaiting approval) -->
+    <changeSet id="test-001-borrowing-pending" author="bookify">
+        <comment>PENDING borrowings (awaiting approval)</comment>
         <insert tableName="borrowing">
             <column name="id" value="550e8400-e29b-41d4-a716-446655440016"/>
             <column name="requested_book_id" value="a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a14"/>
@@ -227,8 +229,10 @@
             <column name="employee_organization" value="ACADEMY"/>
             <column name="employee_number" valueNumeric="301"/>
         </insert>
+    </changeSet>
 
-        <!-- REJECTED borrowings (book unavailable or request denied) -->
+    <changeSet id="test-001-borrowing-rejected" author="bookify">
+        <comment>REJECTED borrowings (book unavailable or request denied)</comment>
         <insert tableName="borrowing">
             <column name="id" value="550e8400-e29b-41d4-a716-446655440018"/>
             <column name="requested_book_id" value="a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11"/>
@@ -247,8 +251,10 @@
             <column name="employee_organization" value="LIBRARY"/>
             <column name="employee_number" valueNumeric="101"/>
         </insert>
+    </changeSet>
 
-        <!-- Overdue books (APPROVED but past expected return date - 30 days from borrow) -->
+    <changeSet id="test-001-borrowing-overdue" author="bookify">
+        <comment>Overdue books (APPROVED but past expected return date - 30 days from borrow)</comment>
         <insert tableName="borrowing">
             <column name="id" value="550e8400-e29b-41d4-a716-446655440020"/>
             <column name="book_id" value="a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a12"/>
@@ -269,8 +275,10 @@
             <column name="employee_organization" value="SCIENCE"/>
             <column name="employee_number" valueNumeric="201"/>
         </insert>
+    </changeSet>
 
-        <!-- Multiple borrowings by same member to test member history -->
+    <changeSet id="test-001-borrowing-member-history" author="bookify">
+        <comment>Multiple borrowings by same member to test member history</comment>
         <insert tableName="borrowing">
             <column name="id" value="550e8400-e29b-41d4-a716-446655440022"/>
             <column name="book_id" value="a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a14"/>
@@ -293,8 +301,10 @@
             <column name="employee_organization" value="ACADEMY"/>
             <column name="employee_number" valueNumeric="301"/>
         </insert>
+    </changeSet>
 
-        <!-- Same book borrowed multiple times (different time periods) -->
+    <changeSet id="test-001-borrowing-same-book-multiple-times" author="bookify">
+        <comment>Same book borrowed multiple times (different time periods)</comment>
         <insert tableName="borrowing">
             <column name="id" value="550e8400-e29b-41d4-a716-446655440024"/>
             <column name="book_id" value="a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11"/>

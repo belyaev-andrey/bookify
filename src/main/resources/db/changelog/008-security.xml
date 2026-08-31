@@ -4,7 +4,7 @@
                     xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
                     http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
 
-    <changeSet id="008-security" author="bookify">
+    <changeSet id="008-security-users" author="bookify">
         <createTable tableName="users">
             <column name="username" type="VARCHAR(50)">
                 <constraints primaryKey="true" nullable="false"/>
@@ -16,7 +16,9 @@
                 <constraints nullable="false"/>
             </column>
         </createTable>
+    </changeSet>
 
+    <changeSet id="008-security-authorities" author="bookify">
         <createTable tableName="authorities">
             <column name="username" type="VARCHAR(50)">
                 <constraints nullable="false"/>
