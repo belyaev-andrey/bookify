@@ -18,6 +18,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @SpringBootTest
 @Import(DbConfiguration.class)
@@ -75,11 +76,9 @@ class BorrowingServiceTest {
 
         try {
             // When: Member borrows a book
-            Optional<Borrowing> result = borrowingService.borrowBook(TEST_BOOK_1, memberId);
+            Borrowing borrowing = borrowingService.borrowBook(TEST_BOOK_1, memberId);
 
             // Then: Borrowing is created successfully
-            assertThat(result).isPresent();
-            Borrowing borrowing = result.get();
             assertThat(borrowing.getId()).isNotNull();
             assertThat(borrowing.getStatus()).isEqualTo(BorrowingStatus.PENDING);
             assertThat(borrowing.getRequestedBookId()).isEqualTo(TEST_BOOK_1);
@@ -100,10 +99,10 @@ class BorrowingServiceTest {
         UUID nonExistentMemberId = UUID.randomUUID();
 
         // When: Trying to borrow
-        Optional<Borrowing> result = borrowingService.borrowBook(TEST_BOOK_1, nonExistentMemberId);
-
-        // Then: Borrowing is rejected
-        assertThat(result).isEmpty();
+        // Then: Borrowing is rejected because no such member exists
+        assertThatThrownBy(() -> borrowingService.borrowBook(TEST_BOOK_1, nonExistentMemberId))
+                .isInstanceOfSatisfying(BorrowNotAllowedException.class, ex ->
+                        assertThat(ex.getReason()).isEqualTo(BorrowNotAllowedException.Reason.MEMBER_NOT_FOUND));
     }
 
     @Test
@@ -118,10 +117,10 @@ class BorrowingServiceTest {
 
         try {
             // When: Disabled member tries to borrow
-            Optional<Borrowing> result = borrowingService.borrowBook(TEST_BOOK_1, memberId);
-
-            // Then: Borrowing is rejected
-            assertThat(result).isEmpty();
+            // Then: Borrowing is rejected because the member is disabled
+            assertThatThrownBy(() -> borrowingService.borrowBook(TEST_BOOK_1, memberId))
+                    .isInstanceOfSatisfying(BorrowNotAllowedException.class, ex ->
+                            assertThat(ex.getReason()).isEqualTo(BorrowNotAllowedException.Reason.MEMBER_DISABLED));
         } finally {
             // Cleanup
             memberRepository.deleteById(memberId);
@@ -155,10 +154,10 @@ class BorrowingServiceTest {
             }
 
             // When: Member tries to borrow one more book
-            Optional<Borrowing> result = borrowingService.borrowBook(TEST_BOOK_1, memberId);
-
-            // Then: Borrowing is rejected
-            assertThat(result).isEmpty();
+            // Then: Borrowing is rejected because the member is at the limit
+            assertThatThrownBy(() -> borrowingService.borrowBook(TEST_BOOK_1, memberId))
+                    .isInstanceOfSatisfying(BorrowNotAllowedException.class, ex ->
+                            assertThat(ex.getReason()).isEqualTo(BorrowNotAllowedException.Reason.BORROW_LIMIT_REACHED));
 
             // Cleanup
             List<Borrowing> borrowings = borrowingRepository.findByMemberId(memberId);
@@ -194,10 +193,10 @@ class BorrowingServiceTest {
             Borrowing saved = borrowingRepository.save(overdueBorrowing);
 
             // When: Member tries to borrow another book
-            Optional<Borrowing> result = borrowingService.borrowBook(TEST_BOOK_1, memberId);
-
             // Then: Borrowing is rejected due to overdue books
-            assertThat(result).isEmpty();
+            assertThatThrownBy(() -> borrowingService.borrowBook(TEST_BOOK_1, memberId))
+                    .isInstanceOfSatisfying(BorrowNotAllowedException.class, ex ->
+                            assertThat(ex.getReason()).isEqualTo(BorrowNotAllowedException.Reason.HAS_OVERDUE_BOOKS));
 
             // Cleanup
             borrowingRepository.deleteById(saved.getId());
@@ -230,13 +229,13 @@ class BorrowingServiceTest {
             Borrowing saved = borrowingRepository.save(borrowing);
 
             // When: Member tries to borrow another book
-            Optional<Borrowing> result = borrowingService.borrowBook(TEST_BOOK_1, memberId);
+            Borrowing result = borrowingService.borrowBook(TEST_BOOK_1, memberId);
 
             // Then: Borrowing is allowed (13 days is not overdue with 14-day limit)
-            assertThat(result).isPresent();
+            assertThat(result).isNotNull();
 
             // Cleanup - delete borrowings first, then member
-            borrowingRepository.deleteById(result.get().getId());
+            borrowingRepository.deleteById(result.getId());
             borrowingRepository.deleteById(saved.getId());
         } finally {
             // Final cleanup in case of exceptions
@@ -434,6 +433,76 @@ class BorrowingServiceTest {
 
         // Then: Return fails
         assertThat(result).isEmpty();
+    }
+
+    @Test
+    void returnBook_ignoresRejectedRequestForTheSameBook() {
+        // Given: A rejected request shaped the way the application creates one - the requested book
+        // is recorded, but bookId stays null because the book was never handed over, and a rejected
+        // request never gets a return date either
+        Member member = new Member();
+        member.setName("Rejected Returner");
+        member.setEmail("rejectedreturn@test.com");
+        member.setEnabled(true);
+        Member savedMember = memberRepository.save(member);
+        UUID memberId = savedMember.getId();
+
+        try {
+            Borrowing rejected = new Borrowing(
+                    null, null, TEST_BOOK_1, memberId, null, null, BorrowingStatus.REJECTED);
+            Borrowing saved = borrowingRepository.save(rejected);
+
+            // When: The member tries to return the book they were never given
+            Optional<Borrowing> result = borrowingService.returnBook(TEST_BOOK_1, memberId);
+
+            // Then: Nothing is returned and the rejected request is left untouched
+            assertThat(result).isEmpty();
+            Borrowing reloaded = borrowingRepository.findById(saved.getId()).orElseThrow();
+            assertThat(reloaded.getStatus()).isEqualTo(BorrowingStatus.REJECTED);
+            assertThat(reloaded.getReturnDate()).isNull();
+        } finally {
+            // Clean up in finally: a failed assertion above would otherwise leave the borrowing
+            // behind and the member delete would fail on a foreign key, hiding the real failure
+            for (Borrowing b : borrowingRepository.findByMemberId(memberId)) {
+                borrowingRepository.deleteById(b.getId());
+            }
+            memberRepository.deleteById(memberId);
+        }
+    }
+
+    @Test
+    void returnBook_ignoresRejectedRequestEvenWhenItCarriesABookId() {
+        // Given: A rejected request that does carry a bookId. The application does not currently
+        // produce this shape - it only sets bookId on the approved branch - but nothing in the
+        // schema prevents it, and returnBook must not depend on that one call site staying so.
+        Member member = new Member();
+        member.setName("Rejected With Book");
+        member.setEmail("rejectedwithbook@test.com");
+        member.setEnabled(true);
+        Member savedMember = memberRepository.save(member);
+        UUID memberId = savedMember.getId();
+
+        try {
+            Borrowing rejected = new Borrowing(
+                    null, TEST_BOOK_1, TEST_BOOK_1, memberId, null, null, BorrowingStatus.REJECTED);
+            Borrowing saved = borrowingRepository.save(rejected);
+
+            // When: The member tries to return a book that was never approved for them
+            Optional<Borrowing> result = borrowingService.returnBook(TEST_BOOK_1, memberId);
+
+            // Then: Nothing is returned and the rejected request is left untouched
+            assertThat(result).isEmpty();
+            Borrowing reloaded = borrowingRepository.findById(saved.getId()).orElseThrow();
+            assertThat(reloaded.getStatus()).isEqualTo(BorrowingStatus.REJECTED);
+            assertThat(reloaded.getReturnDate()).isNull();
+        } finally {
+            // Clean up in finally: a failed assertion above would otherwise leave the borrowing
+            // behind and the member delete would fail on a foreign key, hiding the real failure
+            for (Borrowing b : borrowingRepository.findByMemberId(memberId)) {
+                borrowingRepository.deleteById(b.getId());
+            }
+            memberRepository.deleteById(memberId);
+        }
     }
 
     @Test
@@ -747,6 +816,83 @@ class BorrowingServiceTest {
 
             // Then: Eligible
             assertThat(eligible).isTrue();
+
+            // Cleanup
+            List<Borrowing> borrowings = borrowingRepository.findByMemberId(savedMember.getId());
+            for (Borrowing b : borrowings) {
+                borrowingRepository.deleteById(b.getId());
+            }
+        } finally {
+            memberRepository.deleteById(savedMember.getId());
+        }
+    }
+
+    @Test
+    void isMemberEligibleToBorrow_trueWhenPendingBorrowingHasNoBorrowDateYet() {
+        // Given: A member whose only active borrowing is a PENDING request, which has no borrow
+        // date yet. The overdue check used to dereference that null and blow up with an NPE.
+        Member member = new Member();
+        member.setName("Pending Requester");
+        member.setEmail("pending@test.com");
+        member.setEnabled(true);
+        Member savedMember = memberRepository.save(member);
+
+        try {
+            Borrowing pending = new Borrowing(
+                    null,
+                    null,
+                    TEST_BOOK_1,
+                    savedMember.getId(),
+                    null, // Not approved yet, so no borrow date
+                    null,
+                    BorrowingStatus.PENDING
+            );
+            borrowingRepository.save(pending);
+
+            // When: Checking eligibility
+            boolean eligible = borrowingService.isMemberEligibleToBorrow(savedMember.getId());
+
+            // Then: A request still in flight is not overdue, so the member stays eligible
+            assertThat(eligible).isTrue();
+
+        } finally {
+            // Clean up in finally: a failed assertion above would otherwise leave the borrowing
+            // behind and the member delete would fail on a foreign key, hiding the real failure
+            for (Borrowing b : borrowingRepository.findByMemberId(savedMember.getId())) {
+                borrowingRepository.deleteById(b.getId());
+            }
+            memberRepository.deleteById(savedMember.getId());
+        }
+    }
+
+    @Test
+    void getActiveBorrowingsForMember_excludesRejectedBorrowings() {
+        // Given: A member with a REJECTED borrowing. A rejected request never gets a return date,
+        // so it used to count as active forever and permanently blocked the member.
+        Member member = new Member();
+        member.setName("Rejected Requester");
+        member.setEmail("rejected@test.com");
+        member.setEnabled(true);
+        Member savedMember = memberRepository.save(member);
+
+        try {
+            Borrowing rejected = new Borrowing(
+                    null,
+                    null,
+                    TEST_BOOK_1,
+                    savedMember.getId(),
+                    null, // Never approved, so no borrow date
+                    null, // Rejected requests never get a return date
+                    BorrowingStatus.REJECTED
+            );
+            borrowingRepository.save(rejected);
+
+            // When: Getting active borrowings
+            List<Borrowing> activeBorrowings = borrowingService.getActiveBorrowingsForMember(savedMember.getId());
+
+            // Then: The rejected request does not count, and the member can still borrow
+            assertThat(activeBorrowings).isEmpty();
+            assertThat(borrowingService.isMemberEligibleToBorrow(savedMember.getId())).isTrue();
 
             // Cleanup
             List<Borrowing> borrowings = borrowingRepository.findByMemberId(savedMember.getId());

@@ -204,9 +204,13 @@ class BorrowingControllerTest {
             var borrowRequestResult = mockMvc.post()
                     .uri("/api/borrowings/borrow?bookId=" + TEST_BOOK_ID + "&memberId=" + memberId);
 
-            // Should fail with 404 Not Found
+            // The member exists, so this is a conflict with their state rather than a 404,
+            // and the body says which rule rejected the request
             assertThat(borrowRequestResult)
-                    .hasStatus(HttpStatus.NOT_FOUND);
+                    .hasStatus(HttpStatus.CONFLICT)
+                    .bodyJson()
+                    .extractingPath("$.reason")
+                    .isEqualTo("MEMBER_DISABLED");
 
             // Verify no borrowing was created
             List<Borrowing> borrowings = borrowingRepository.findByMemberId(memberId);
@@ -215,5 +219,48 @@ class BorrowingControllerTest {
             // Clean up
             memberRepository.deleteById(memberId);
         }
+    }
+
+    @Test
+    void testBorrowWithoutRequiredParametersReturnsBadRequest() {
+        // A missing query parameter is the caller's mistake, so it must not surface as a 500
+        var borrowRequestResult = mockMvc.post()
+                .uri("/api/borrowings/borrow");
+
+        assertThat(borrowRequestResult)
+                .hasStatus(HttpStatus.BAD_REQUEST)
+                .bodyJson()
+                .extractingPath("$.error")
+                .asString()
+                .contains("bookId");
+    }
+
+    @Test
+    void testBorrowWithMalformedUuidReturnsBadRequest() {
+        // Same for a parameter that is present but cannot be parsed as a UUID
+        var borrowRequestResult = mockMvc.post()
+                .uri("/api/borrowings/borrow?bookId=not-a-uuid&memberId=" + UUID.randomUUID());
+
+        assertThat(borrowRequestResult)
+                .hasStatus(HttpStatus.BAD_REQUEST)
+                .bodyJson()
+                .extractingPath("$.error")
+                .isEqualTo("Invalid value for parameter 'bookId'");
+    }
+
+    @Test
+    void testBorrowForUnknownMemberReturnsNotFound() {
+        // A member that genuinely does not exist is the one case that is still a 404 - but it
+        // now carries a body naming the reason, so it is distinguishable from a mistyped URL.
+        UUID unknownMemberId = UUID.randomUUID();
+
+        var borrowRequestResult = mockMvc.post()
+                .uri("/api/borrowings/borrow?bookId=" + TEST_BOOK_ID + "&memberId=" + unknownMemberId);
+
+        assertThat(borrowRequestResult)
+                .hasStatus(HttpStatus.NOT_FOUND)
+                .bodyJson()
+                .extractingPath("$.reason")
+                .isEqualTo("MEMBER_NOT_FOUND");
     }
 }

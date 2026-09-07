@@ -2,9 +2,13 @@ package org.jetbrains.conf.bookify.config;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.core.env.Environment;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.MissingServletRequestParameterException;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 import java.util.Map;
+import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
@@ -50,6 +54,35 @@ class ErrorControllerAdviceTest {
         assertThat(response.getBody())
                 .containsEntry("error", "boom")
                 .containsKey("stackTrace");
+    }
+
+    @Test
+    void handleValidationExceptions_answersSpringsClientErrorsWithTheirOwnStatus() {
+        Environment environment = mock(Environment.class);
+        when(environment.getActiveProfiles()).thenReturn(new String[] {"dev"});
+        ErrorControllerAdvice advice = new ErrorControllerAdvice(environment);
+
+        ResponseEntity<Map<String, Object>> response = advice.handleValidationExceptions(
+                new MissingServletRequestParameterException("bookId", "UUID"));
+
+        // A missing query parameter is the caller's mistake, not a server failure, and the body
+        // must not carry a stack trace even in development
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+        assertThat(response.getBody()).doesNotContainKey("stackTrace");
+        assertThat(response.getBody()).extractingByKey("error").asString().contains("bookId");
+    }
+
+    @Test
+    void handleMethodArgumentTypeMismatch_namesTheOffendingParameter() {
+        Environment environment = mock(Environment.class);
+        when(environment.getActiveProfiles()).thenReturn(new String[] {"dev"});
+        ErrorControllerAdvice advice = new ErrorControllerAdvice(environment);
+
+        ResponseEntity<Map<String, Object>> response = advice.handleMethodArgumentTypeMismatch(
+                new MethodArgumentTypeMismatchException("not-a-uuid", UUID.class, "bookId", null, null));
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+        assertThat(response.getBody()).containsEntry("error", "Invalid value for parameter 'bookId'");
     }
 
     @Test
