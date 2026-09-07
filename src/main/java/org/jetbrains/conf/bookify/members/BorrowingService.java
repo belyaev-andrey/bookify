@@ -14,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -30,25 +31,25 @@ class BorrowingService {
      * Create a borrowing request for a member.
      * @param bookId the ID of the book to borrow
      * @param memberId the ID of the member borrowing the book
-     * @return the borrowing request if successful, empty otherwise
+     * @return the created borrowing request
+     * @throws BorrowNotAllowedException if the member is not eligible to borrow
      */
     @Transactional
-    Optional<Borrowing> borrowBook(UUID bookId, UUID memberId) {
-        if (!isMemberEligibleToBorrow(memberId)) {
-            return Optional.empty();
-        }
-        Optional<Member> memberOpt = memberService.findById(memberId);
-        if (memberOpt.isEmpty()) {
-            return Optional.empty();
-        }
+    Borrowing borrowBook(UUID bookId, UUID memberId) {
+        findIneligibilityReason(memberId).ifPresent(reason -> {
+            throw new BorrowNotAllowedException(reason, memberId);
+        });
+        Member member = memberService.findById(memberId)
+                .orElseThrow(() -> new BorrowNotAllowedException(BorrowNotAllowedException.Reason.MEMBER_NOT_FOUND, memberId));
         Book requestedBook = entityManager.getReference(Book.class, bookId);
-        Borrowing borrowing = new Borrowing(null, null, requestedBook, memberOpt.get(), null, null, BorrowingStatus.PENDING);
-        UUID borrowingId = borrowingRepository.save(borrowing).getId();
+        Borrowing borrowing = new Borrowing(null, null, requestedBook, member, null, null, BorrowingStatus.PENDING);
+        Borrowing savedBorrowing = borrowingRepository.save(borrowing);
+        UUID borrowingId = savedBorrowing.getId();
         if (borrowingId == null) {
-            return Optional.empty();
+            throw new IllegalStateException("Saved borrowing has no ID");
         }
         eventPublisher.publishEvent(new BookBorrowRequestEvent(bookId, borrowingId));
-        return borrowingRepository.findById(borrowingId);
+        return savedBorrowing;
     }
 
     /**
@@ -109,9 +110,12 @@ class BorrowingService {
     Optional<Borrowing> returnBook(UUID bookId, UUID memberId) {
         // Step 1: A member requests to return a book (implicit in method call)
 
-        // Step 2: The Members module validates the borrowing record
-        List<Borrowing> activeBorrowings = borrowingRepository.findByBookIdAndReturnDateIsNull(bookId);
-        Optional<Borrowing> borrowingOpt = activeBorrowings.stream()
+        // Step 2: The Members module validates the borrowing record. Only an approved, unreturned
+        // borrowing can be handed back - a request that is still pending or was rejected never put
+        // the book in the member's hands.
+        List<Borrowing> outstandingBorrowings =
+                borrowingRepository.findByBookIdAndReturnDateIsNullAndStatus(bookId, BorrowingStatus.APPROVED);
+        Optional<Borrowing> borrowingOpt = outstandingBorrowings.stream()
                 .filter(b -> (b.getMember() != null) && (b.getMember().getId() != null) && (b.getMember().getId().equals(memberId)))
                 .findFirst();
 
@@ -148,7 +152,7 @@ class BorrowingService {
      */
     @Transactional(readOnly = true)
     List<Borrowing> getActiveBorrowingsForMember(UUID memberId) {
-        return borrowingRepository.findByMemberIdAndReturnDateIsNull(memberId);
+        return borrowingRepository.findByMemberIdAndReturnDateIsNullAndStatusNot(memberId, BorrowingStatus.REJECTED);
     }
 
     /**
@@ -158,24 +162,42 @@ class BorrowingService {
      */
     @Transactional(readOnly = true)
     boolean isMemberEligibleToBorrow(UUID memberId) {
+        return findIneligibilityReason(memberId).isEmpty();
+    }
+
+    /**
+     * Work out why a member may not borrow a book.
+     * @param memberId the ID of the member
+     * @return the rule that rejects the member, or empty if the member is eligible
+     */
+    @Transactional(readOnly = true)
+    Optional<BorrowNotAllowedException.Reason> findIneligibilityReason(UUID memberId) {
         // Check if member exists and is active
         Optional<Member> memberOpt = memberService.findById(memberId);
-        if (memberOpt.isEmpty() || !memberOpt.get().isEnabled()) {
-            return false;
+        if (memberOpt.isEmpty()) {
+            return Optional.of(BorrowNotAllowedException.Reason.MEMBER_NOT_FOUND);
+        }
+        if (!memberOpt.get().isEnabled()) {
+            return Optional.of(BorrowNotAllowedException.Reason.MEMBER_DISABLED);
         }
 
-        // Check if the member has too many active borrowings (limit to 5)
+        // Check if the member has too many active borrowings
         List<Borrowing> activeBorrowings = getActiveBorrowingsForMember(memberId);
         if (activeBorrowings.size() >= bookifySettingsConfig.getMaximumBooksBorrowed()) {
-            return false;
+            return Optional.of(BorrowNotAllowedException.Reason.BORROW_LIMIT_REACHED);
         }
 
-        // Check if the member has any overdue books
-        // A book is considered overdue if it has been borrowed for more than 14 days
-        LocalDateTime twoWeeksAgo = LocalDateTime.now().minusDays(bookifySettingsConfig.getOverdueDays());
+        // Check if the member has any overdue books. A book is overdue once it has been held for
+        // more than the configured number of days; a PENDING request has no borrow date yet, so it
+        // is still in flight rather than overdue.
+        LocalDateTime overdueBefore = LocalDateTime.now().minusDays(bookifySettingsConfig.getOverdueDays());
         boolean hasOverdueBooks = activeBorrowings.stream()
-                .anyMatch(b -> b.getBorrowDate() != null && b.getBorrowDate().isBefore(twoWeeksAgo));
-        return !hasOverdueBooks;
+                .map(Borrowing::getBorrowDate)
+                .filter(Objects::nonNull)
+                .anyMatch(borrowDate -> borrowDate.isBefore(overdueBefore));
+        return hasOverdueBooks
+                ? Optional.of(BorrowNotAllowedException.Reason.HAS_OVERDUE_BOOKS)
+                : Optional.empty();
     }
 
     @Transactional(readOnly = true)

@@ -33,13 +33,14 @@ class BorrowingController {
      * Create a borrowing request for a member.
      * @param bookId the ID of the book to borrow
      * @param memberId the ID of the member borrowing the book
-     * @return the borrowing request if successful, 404 otherwise
+     * @return 201 Created, with a Location header pointing at the new borrowing
+     * @throws BorrowNotAllowedException if the member may not borrow; mapped to 404 when no such
+     *         member exists and to 409 when the member's current state forbids borrowing
      */
     @PostMapping(value = "/borrow", produces = "application/json")
-    ResponseEntity<Object> borrowBook(@RequestParam UUID bookId, @RequestParam UUID memberId) {
-        return borrowingService.borrowBook(bookId, memberId)
-                .map(b -> ResponseEntity.created(URI.create("/api/borrowings/%s".formatted(b.getId()))).build())
-                .orElse(ResponseEntity.notFound().build());
+    ResponseEntity<Void> borrowBook(@RequestParam UUID bookId, @RequestParam UUID memberId) {
+        Borrowing borrowing = borrowingService.borrowBook(bookId, memberId);
+        return ResponseEntity.created(URI.create("/api/borrowings/%s".formatted(borrowing.getId()))).build();
     }
 
     /**
