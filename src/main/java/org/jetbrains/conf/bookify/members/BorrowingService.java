@@ -1,6 +1,7 @@
 package org.jetbrains.conf.bookify.members;
 
 import org.jetbrains.conf.bookify.config.BookifySettingsConfig;
+import org.jetbrains.conf.bookify.events.AssignFineEvent;
 import org.jetbrains.conf.bookify.events.BookAvailabilityCheckedEvent;
 import org.jetbrains.conf.bookify.events.BookBorrowRequestEvent;
 import org.jetbrains.conf.bookify.events.BookReturnedEvent;
@@ -9,6 +10,7 @@ import org.springframework.modulith.events.ApplicationModuleListener;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -115,6 +117,13 @@ class BorrowingService {
         // Step 4: The Books module updates the book's availability (via event)
         eventPublisher.publishEvent(new BookReturnedEvent(bookId, memberId));
 
+        // Step 5: A book handed back after the loan period hands its overdue period to the
+        // payments module (via event), which prices it against the book's fine rate.
+        long overdueDays = calculateOverdueDays(savedBorrowing);
+        if (overdueDays < 0) {
+            eventPublisher.publishEvent(new AssignFineEvent(bookId, memberId, (int) overdueDays));
+        }
+
         return Optional.of(savedBorrowing);
     }
 
@@ -146,6 +155,21 @@ class BorrowingService {
     @Transactional(readOnly = true)
     boolean isMemberEligibleToBorrow(UUID memberId) {
         return findIneligibilityReason(memberId).isEmpty();
+    }
+
+    /**
+     * Work out how many days beyond the loan period a borrowing was held.
+     * @param borrowing the returned borrowing
+     * @return the number of days the book was overdue, or 0 if it came back in time
+     */
+    private long calculateOverdueDays(Borrowing borrowing) {
+        LocalDateTime borrowDate = borrowing.getBorrowDate();
+        LocalDateTime returnDate = borrowing.getReturnDate();
+        if (borrowDate == null || returnDate == null) {
+            return 0;
+        }
+        long daysHeld = Duration.between(borrowDate, returnDate).toDays();
+        return Math.max(0, daysHeld - bookifySettingsConfig.getOverdueDays());
     }
 
     /**
