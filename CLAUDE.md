@@ -63,6 +63,30 @@ methods. The `spring-data-jpa` branch uses Spring Data JPA/Hibernate instead (`@
 The `Borrowing` entity has two book references: `requestedBook` (always set, the originally requested book) and `book`
 (only set on `APPROVED`, the actually borrowed book).
 
+### Startup ordering
+
+The `books` module carries a deliberate mix of the two dependency kinds Spring distinguishes, so that a bean inspector
+can be exercised against it.
+
+`BookCatalogWarmup` logs that the catalogue is ready from `@PostConstruct`. It is registered by
+`BookCatalogWarmupConfiguration` under its own name plus the alias `catalogWarmup`, and nothing injects it — beans
+that need its initialization side effect order themselves after it with `@DependsOn` instead:
+
+- `BookCatalogReporter` names the title behind a rejected borrow request, which
+  `BookAvailabilityCheckedEvent` cannot carry — it holds only a book id and a flag. It declares
+  `@DependsOn("bookCatalogWarmup")` and injects `BookRepository`, so its two dependencies are of different kinds —
+  one ordering-only, one injected.
+- `BookCatalogAuditor` warns when a borrow request names a book the catalogue does not hold, a case
+  `BookService.handleBookBorrowedEvent` otherwise reports as ordinary unavailability. It declares
+  `@DependsOn({"catalogWarmup", "bookRepository"})` and also injects `BookRepository`, so it names the warm-up by its
+  *alias* and names `bookRepository` both as a declared dependency and as an injected one. The container merges the
+  latter into a single dependency edge, registering the declared one first.
+
+Both listen with plain `@EventListener` rather than `@ApplicationModuleListener`: they only read, and durable event
+publication is not configured in the `dev` profile. Neither touches the database during initialization, which matters
+because Flyway migrates after these beans are constructed — `BookCatalogWarmup` is created before the schema
+exists.
+
 ### Security
 
 HTTP Basic Auth. `LIBRARIAN` role is required for `POST /api/members`, `POST /api/books`, `DELETE /api/books/**`,
