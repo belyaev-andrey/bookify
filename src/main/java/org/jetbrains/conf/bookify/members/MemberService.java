@@ -1,5 +1,8 @@
 package org.jetbrains.conf.bookify.members;
 
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -11,6 +14,10 @@ import java.util.UUID;
 
 @Service
 class MemberService {
+
+    static final String MEMBERS_CACHE = "members";
+    static final String ALL_MEMBERS_CACHE = "allMembers";
+    static final String ACTIVE_MEMBERS_CACHE = "activeMembers";
 
     private final MemberRepository memberRepository;
 
@@ -24,7 +31,8 @@ class MemberService {
      * @return the saved member
      */
     @Transactional
-    Member addMember(Member member) {
+    @CacheEvict(cacheNames = {ALL_MEMBERS_CACHE, ACTIVE_MEMBERS_CACHE}, allEntries = true)
+    public Member addMember(Member member) {
         return memberRepository.save(member);
     }
 
@@ -35,7 +43,11 @@ class MemberService {
      */
     @Transactional
     @PreAuthorize("hasRole('SUPERVISOR')")
-    Optional<Member> disableMember(UUID id) {
+    @Caching(evict = {
+            @CacheEvict(cacheNames = MEMBERS_CACHE, key = "#id"),
+            @CacheEvict(cacheNames = {ALL_MEMBERS_CACHE, ACTIVE_MEMBERS_CACHE}, allEntries = true)
+    })
+    public Optional<Member> disableMember(UUID id) {
         Optional<Member> memberOpt = memberRepository.findById(id);
         if (memberOpt.isPresent()) {
             Member member = memberOpt.get();
@@ -70,7 +82,8 @@ class MemberService {
      * @return a list of all members
      */
     @Transactional(readOnly = true)
-    List<Member> findAll() {
+    @Cacheable(ALL_MEMBERS_CACHE)
+    public List<Member> findAll() {
         List<Member> members = new ArrayList<>();
         memberRepository.findAll().forEach(members::add);
         return members;
@@ -81,7 +94,8 @@ class MemberService {
      * @return a list of all active members
      */
     @Transactional(readOnly = true)
-    List<Member> findAllActive() {
+    @Cacheable(ACTIVE_MEMBERS_CACHE)
+    public List<Member> findAllActive() {
         return memberRepository.findByEnabled(true);
     }
 
@@ -91,7 +105,8 @@ class MemberService {
      * @return the member, if found
      */
     @Transactional(readOnly = true)
-    Optional<Member> findById(UUID id) {
+    @Cacheable(cacheNames = MEMBERS_CACHE, unless = "#result == null")
+    public Optional<Member> findById(UUID id) {
         return memberRepository.findById(id);
     }
 }

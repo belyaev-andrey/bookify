@@ -41,7 +41,7 @@ access rules are violated.
 | `members`  | Members, borrowing records, borrow/return lifecycle   |
 | `payments` | Fine rate management, overdue fine processing         |
 | `events`   | Shared event record types (the only cross-module API) |
-| `config`   | Security, AOT, global settings                        |
+| `config`   | Security, AOT, caching, global settings               |
 
 **Modules communicate exclusively via Spring Application Events** defined in the `events` package. Direct cross-module
 bean injection is not allowed by Modulith. Use `@ApplicationModuleListener` for event consumers.
@@ -133,6 +133,39 @@ Conventions for the binding rule every `bookify.*` property must follow.
     `BOOKIFY_PAYMENTS_PROVIDER`.
   - `bookify.payments.production.base-url` / `bookify.payments.production.api-key` — used by
     `ProductionPaymentProvider`'s HTTP client to call the external payment gateway
+
+### Caching
+
+Spring Cache backed by Caffeine, auto-configured from `spring.cache.*` in `application.properties` (max 1000 entries
+per cache, `expireAfterWrite=10m`). `config.CacheConfig` holds `@EnableCaching`. The cache names are listed
+explicitly, so a cache annotation naming any other cache fails at call time. Cache-name constants live on the owning
+service:
+
+| Cache           | Filled by                     | Evicted by                                                                     |
+|-----------------|-------------------------------|--------------------------------------------------------------------------------|
+| `books`         | `BookService.findById`        | `saveBook` (`@CachePut`), `removeBook`, `handleBookBorrowedEvent`/`handleBookReturnedEvent` |
+| `allBooks`      | `BookService.findAll`         | all of the above                                                               |
+| `members`       | `MemberService.findById`      | `disableMember`                                                                |
+| `allMembers`    | `MemberService.findAll`       | `addMember`, `disableMember`                                                   |
+| `activeMembers` | `MemberService.findAllActive` | `addMember`, `disableMember`                                                   |
+
+Searches, borrowings and fine rates are not cached.
+
+- `@EnableCaching(order = LOWEST_PRECEDENCE - 1)` puts the cache advice outside the transaction advice, so puts and
+  evictions run after the commit. This only holds when the cached or evicting method is where its transaction
+  starts. Keep it that way: don't call these methods from inside a wider `@Transactional`. It still doesn't close
+  every race: a read that loads the old row before the commit and caches it after the eviction stays stale until the
+  TTL.
+- The book evictions sit on the `@ApplicationModuleListener` methods, not on `markBookAsBorrowed`/`markBookAsReturned`.
+  Those are self-invoked, so the cache proxy never sees them.
+- `@PreAuthorize` runs outside the cache advice, so a denied `removeBook`/`disableMember` evicts nothing.
+- Writes that bypass the services (repository calls, direct SQL, or another app instance, since Caffeine is
+  per-node) aren't evicted and stay stale for up to 10 minutes. That includes a member disabled outside
+  `disableMember`, who can keep borrowing until then, because `BorrowingService`'s eligibility check reads the cached
+  member.
+- Caching is active in the `test` profile. The Spring context and its caches are shared across test classes, so
+  tests that write through repositories should use fresh ids or clear the caches (see `BookCachingTest` and
+  `MemberCachingTest`).
 
 ### Database
 
