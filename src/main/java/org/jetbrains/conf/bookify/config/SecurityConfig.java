@@ -28,7 +28,7 @@ class SecurityConfig {
      */
     @Bean
     @Profile("!strict-security")
-    SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    SecurityFilterChain securityFilterChain(HttpSecurity http) {
         http
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.POST,
@@ -65,7 +65,7 @@ class SecurityConfig {
      */
     @Bean
     @Profile("strict-security")
-    SecurityFilterChain strictSecurityFilterChain(HttpSecurity http) throws Exception {
+    SecurityFilterChain strictSecurityFilterChain(HttpSecurity http) {
         http
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.POST,

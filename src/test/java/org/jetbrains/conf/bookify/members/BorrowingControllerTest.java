@@ -11,10 +11,12 @@ import org.springframework.http.HttpStatus;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.assertj.MockMvcTester;
 
+import java.time.Duration;
 import java.util.List;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.awaitility.Awaitility.await;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -38,7 +40,7 @@ class BorrowingControllerTest {
 
 
     @Test
-    void testBorrowingWorkflow() throws Exception {
+    void testBorrowingWorkflow() {
         // 1. Create a test member
         Member member = new Member();
         member.setName("Test Member");
@@ -66,19 +68,12 @@ class BorrowingControllerTest {
             assertThat(borrowing.getStatus()).isIn(BorrowingStatus.PENDING, BorrowingStatus.APPROVED);
 
             // Wait for the book availability check to complete and update the status
-            // Use polling with timeout instead of Thread.sleep
-            long startTime = System.currentTimeMillis();
-            long timeout = 5000; // 5 seconds timeout
-            BorrowingStatus status = BorrowingStatus.PENDING;
-
-            while (status == BorrowingStatus.PENDING && System.currentTimeMillis() - startTime < timeout) {
-                Thread.sleep(100); // Small sleep to avoid hammering the database
-                borrowing = borrowingRepository.findById(borrowingId).orElseThrow();
-                status = borrowing.getStatus();
-            }
+            borrowing = await().atMost(Duration.ofSeconds(5))
+                    .until(() -> borrowingRepository.findById(borrowingId).orElseThrow(),
+                            b -> b.getStatus() != BorrowingStatus.PENDING);
 
             // Verify the borrowing status is now APPROVED (assuming the book is available in the test database)
-            assertThat(status).isEqualTo(BorrowingStatus.APPROVED);
+            assertThat(borrowing.getStatus()).isEqualTo(BorrowingStatus.APPROVED);
 
             // 4. Get the borrowing by ID
             var getBorrowingResult = mockMvc.get()
@@ -125,7 +120,7 @@ class BorrowingControllerTest {
     }
 
     @Test
-    void testBorrowingRejection() throws Exception {
+    void testBorrowingRejection() {
         // 1. Create a test member
         Member member = new Member();
         member.setName("Test Member 2");
@@ -155,19 +150,12 @@ class BorrowingControllerTest {
             assertThat(borrowing.getStatus()).isIn(BorrowingStatus.REJECTED, BorrowingStatus.PENDING);
 
             // Wait for the book availability check to complete and update the status
-            // Use polling with timeout instead of Thread.sleep
-            long startTime = System.currentTimeMillis();
-            long timeout = 5000; // 5 seconds timeout
-            BorrowingStatus status = BorrowingStatus.PENDING;
-
-            while (status == BorrowingStatus.PENDING && System.currentTimeMillis() - startTime < timeout) {
-                Thread.sleep(100); // Small sleep to avoid hammering the database
-                borrowing = borrowingRepository.findById(borrowingId).orElseThrow();
-                status = borrowing.getStatus();
-            }
+            borrowing = await().atMost(Duration.ofSeconds(5))
+                    .until(() -> borrowingRepository.findById(borrowingId).orElseThrow(),
+                            b -> b.getStatus() != BorrowingStatus.PENDING);
 
             // Verify the borrowing status is now REJECTED (since the book doesn't exist)
-            assertThat(status).isEqualTo(BorrowingStatus.REJECTED);
+            assertThat(borrowing.getStatus()).isEqualTo(BorrowingStatus.REJECTED);
 
             // requestedBook is null because the non-existent book cannot be resolved via LEFT JOIN
             assertThat(borrowing.getRequestedBook()).isNull();

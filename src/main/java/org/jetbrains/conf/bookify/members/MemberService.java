@@ -33,7 +33,7 @@ class MemberService {
      */
     @Transactional
     @CacheEvict(cacheNames = {ALL_MEMBERS_CACHE, ACTIVE_MEMBERS_CACHE}, allEntries = true)
-    public Member addMember(Member member) {
+    Member addMember(Member member) {
         return memberRepository.save(member);
     }
 
@@ -49,7 +49,7 @@ class MemberService {
             @CacheEvict(cacheNames = MEMBERS_CACHE, key = "#id"),
             @CacheEvict(cacheNames = {ALL_MEMBERS_CACHE, ACTIVE_MEMBERS_CACHE}, allEntries = true)
     })
-    public Optional<Member> disableMember(UUID id) {
+    Optional<Member> disableMember(UUID id) {
         Optional<Member> memberOpt = memberRepository.findById(id);
         if (memberOpt.isPresent()) {
             Member member = memberOpt.get();
@@ -88,7 +88,7 @@ class MemberService {
      */
     @Transactional(readOnly = true)
     @Cacheable(ALL_MEMBERS_CACHE)
-    public List<Member> findAll() {
+    List<Member> findAll() {
         List<Member> members = new ArrayList<>();
         members.addAll(memberRepository.findAll());
         return members;
@@ -101,7 +101,7 @@ class MemberService {
      */
     @Transactional(readOnly = true)
     @Cacheable(ACTIVE_MEMBERS_CACHE)
-    public List<Member> findAllActive() {
+    List<Member> findAllActive() {
         List<Member> members = memberRepository.findAll()
                 .stream().filter(Member::isEnabled).toList();
         return members;
@@ -115,7 +115,7 @@ class MemberService {
      */
     @Transactional(readOnly = true)
     @Cacheable(cacheNames = MEMBERS_CACHE, unless = "#result == null")
-    public Optional<Member> findById(UUID id) {
+    Optional<Member> findById(UUID id) {
         return memberRepository.findById(id);
     }
 }
