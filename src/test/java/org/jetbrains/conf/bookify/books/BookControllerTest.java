@@ -27,7 +27,7 @@ class BookControllerTest {
     private MockMvcTester mockMvc;
 
     @Test
-    void testFetchAll() throws Exception {
+    void testFetchAll() {
         var booksRequestResult = mockMvc.get().uri("/api/books");
         assertThat(booksRequestResult)
                 .hasStatus(HttpStatus.OK)
@@ -35,7 +35,7 @@ class BookControllerTest {
     }
 
     @Test
-    void testFetchExistingById() throws Exception {
+    void testFetchExistingById() {
         var booksRequestResult = mockMvc.get().uri("/api/books/a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a14");
         assertThat(booksRequestResult)
                 .hasStatus(HttpStatus.OK)
@@ -43,14 +43,14 @@ class BookControllerTest {
     }
 
     @Test
-    void testFetchNonExistingById() throws Exception {
+    void testFetchNonExistingById() {
         var booksRequestResult = mockMvc.get().uri("/api/books/00000000-0000-0000-0000-000000000000");
         assertThat(booksRequestResult)
                 .hasStatus(HttpStatus.NOT_FOUND);
     }
 
      @Test
-     void testAddBook() throws Exception {
+     void testAddBook() {
          // Add a book
          var addBookResult = mockMvc.post()
                  .uri("/api/books")
@@ -63,7 +63,7 @@ class BookControllerTest {
      }
 
     @Test
-    void testUpdateExistingBook() throws Exception {
+    void testUpdateExistingBook() {
         // Update a book
         var updateBookResult = mockMvc.put()
                 .uri("/api/books")
@@ -83,7 +83,7 @@ class BookControllerTest {
 
 
     @Test
-    void testUpdateNonExistingBook() throws Exception {
+    void testUpdateNonExistingBook() {
         // Update a book
         var updateBookResult = mockMvc.put()
                 .uri("/api/books")
@@ -97,7 +97,19 @@ class BookControllerTest {
 
 
     @Test
-    void testRemoveBook() throws Exception {
+    void testUpdateBookWithoutId() {
+        var updateBookResult = mockMvc.put()
+                .uri("/api/books")
+                .header("Authorization", LIBRARIAN_AUTH)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"name\":\"Test Book\",\"isbn\":\"1234567890\"}");
+
+        assertThat(updateBookResult)
+                .hasStatus(HttpStatus.BAD_REQUEST);
+    }
+
+    @Test
+    void testRemoveBook() {
         var removeBookResult = mockMvc.delete()
                 .uri("/api/books/a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11")
                 .header("Authorization", LIBRARIAN_AUTH);
@@ -105,7 +117,7 @@ class BookControllerTest {
     }
 
     @Test
-    void testSearchBooksByName() throws Exception {
+    void testSearchBooksByName() {
         // Search for books with "Lord" in the name (from initial data)
         var searchResult = mockMvc.get().uri("/api/books/search?name=Lord");
         assertThat(searchResult)

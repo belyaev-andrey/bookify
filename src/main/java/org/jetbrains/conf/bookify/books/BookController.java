@@ -3,6 +3,7 @@ package org.jetbrains.conf.bookify.books;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.net.URI;
 import java.util.List;
@@ -45,7 +46,11 @@ class BookController {
 
     @PutMapping("")
     public ResponseEntity<BookResponse> updateBook(@RequestBody BookUpdateRequest request) {
-        return bookService.findById(request.id())
+        UUID id = request.id();
+        if (id == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Book id is required");
+        }
+        return bookService.findById(id)
                 .map(b -> ResponseEntity.ok(bookMapper.toResponse(bookService.saveBook(bookMapper.toEntity(request)))))
                 .orElse(ResponseEntity.notFound().build());
     }

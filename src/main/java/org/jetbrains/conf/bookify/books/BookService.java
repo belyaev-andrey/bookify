@@ -3,7 +3,6 @@ package org.jetbrains.conf.bookify.books;
 import org.jetbrains.conf.bookify.events.BookAvailabilityCheckedEvent;
 import org.jetbrains.conf.bookify.events.BookBorrowRequestEvent;
 import org.jetbrains.conf.bookify.events.BookReturnedEvent;
-import org.jspecify.annotations.Nullable;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
@@ -46,7 +45,7 @@ class BookService {
             put = @CachePut(cacheNames = BOOKS_CACHE, key = "#result.id"),
             evict = @CacheEvict(cacheNames = ALL_BOOKS_CACHE, allEntries = true)
     )
-    public Book saveBook(Book book) {
+    Book saveBook(Book book) {
         return bookRepository.save(book);
     }
 
@@ -61,7 +60,7 @@ class BookService {
             @CacheEvict(cacheNames = BOOKS_CACHE, key = "#id"),
             @CacheEvict(cacheNames = ALL_BOOKS_CACHE, allEntries = true)
     })
-    public void removeBook(UUID id) {
+    void removeBook(UUID id) {
         try {
             bookRepository.deleteById(id);
         } catch (DataIntegrityViolationException e) {
@@ -86,7 +85,7 @@ class BookService {
      */
     @Transactional(readOnly = true)
     @Cacheable(ALL_BOOKS_CACHE)
-    public List<Book> findAll() {
+    List<Book> findAll() {
         List<Book> books = new ArrayList<>();
         bookRepository.findAll().forEach(books::add);
         return books;
@@ -127,7 +126,7 @@ class BookService {
 
     @Transactional(readOnly = true)
     @Cacheable(cacheNames = BOOKS_CACHE, unless = "#result == null")
-    public Optional<Book> findById(@Nullable UUID id) {
+    public Optional<Book> findById(UUID id) {
         return bookRepository.findById(id);
     }
 
@@ -141,7 +140,7 @@ class BookService {
             @CacheEvict(cacheNames = BOOKS_CACHE, key = "#event.bookId()"),
             @CacheEvict(cacheNames = ALL_BOOKS_CACHE, allEntries = true)
     })
-    public void handleBookBorrowedEvent(BookBorrowRequestEvent event) {
+    void handleBookBorrowedEvent(BookBorrowRequestEvent event) {
         Optional<Book> updatedBook = markBookAsBorrowed(event.bookId());
         eventPublisher.publishEvent(new BookAvailabilityCheckedEvent(event.bookId(), event.borrowId(), updatedBook.isPresent()));
     }
@@ -156,7 +155,7 @@ class BookService {
             @CacheEvict(cacheNames = BOOKS_CACHE, key = "#event.bookId()"),
             @CacheEvict(cacheNames = ALL_BOOKS_CACHE, allEntries = true)
     })
-    public void handleBookReturnedEvent(BookReturnedEvent event) {
+    void handleBookReturnedEvent(BookReturnedEvent event) {
         markBookAsReturned(event.bookId());
     }
 

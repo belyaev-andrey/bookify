@@ -29,7 +29,7 @@ class MemberControllerTest {
     private MockMvcTester mockMvc;
 
     @Test
-    void testFetchAll() throws Exception {
+    void testFetchAll() {
         var membersRequestResult = mockMvc.get().uri("/api/members");
         assertThat(membersRequestResult)
                 .hasStatus(HttpStatus.OK)
@@ -37,7 +37,7 @@ class MemberControllerTest {
     }
 
     @Test
-    void testFetchAllActive() throws Exception {
+    void testFetchAllActive() {
         var activeRequestResult = mockMvc.get()
                 .uri("/api/members/active")
                 .header("Authorization", LIBRARIAN_AUTH);
@@ -47,7 +47,7 @@ class MemberControllerTest {
     }
 
     @Test
-    void testFetchAllActiveAsLibrarianExcludesDisabled() throws Exception {
+    void testFetchAllActiveAsLibrarianExcludesDisabled() {
         // A plain librarian only satisfies the HTTP-level LIBRARIAN check, so getAllActive()
         // takes the findAllActive() branch - the disabled test member is left out.
         var activeRequestResult = mockMvc.get()
@@ -60,7 +60,7 @@ class MemberControllerTest {
     }
 
     @Test
-    void testFetchAllActiveAsAdminIncludesDisabled() throws Exception {
+    void testFetchAllActiveAsAdminIncludesDisabled() {
         // testadmin holds LIBRARIAN (satisfying the same HTTP-level matcher as any librarian)
         // plus ADMIN, which flips getAllActive() to the findAll() branch - the disabled member
         // is included, even though the HTTP-level rule for this endpoint never mentions ADMIN.
@@ -74,7 +74,7 @@ class MemberControllerTest {
     }
 
     @Test
-    void testAddMember() throws Exception {
+    void testAddMember() {
         // Add a member
         var addMemberResult = mockMvc.post()
                 .uri("/api/members")
@@ -87,7 +87,7 @@ class MemberControllerTest {
     }
 
     @Test
-    void testDisableMember() throws Exception {
+    void testDisableMember() {
         // Disabling a member requires SUPERVISOR via @PreAuthorize on MemberService.disableMember,
         // in addition to the LIBRARIAN role the HTTP-level matcher checks - a plain librarian
         // passes the matcher but is denied at the method layer.
@@ -112,7 +112,7 @@ class MemberControllerTest {
     }
 
     @Test
-    void testSearchMembersByName() throws Exception {
+    void testSearchMembersByName() {
         // Search for members with "John" in the name (from initial data)
         var searchResult = mockMvc.get().uri("/api/members/search?name=John");
         assertThat(searchResult)
@@ -121,7 +121,7 @@ class MemberControllerTest {
     }
 
     @Test
-    void testSearchMembersByEmail() throws Exception {
+    void testSearchMembersByEmail() {
         // Search for members with "example.com" in the email (from initial data)
         var searchResult = mockMvc.get().uri("/api/members/search?email=example.com");
         assertThat(searchResult)
@@ -130,7 +130,7 @@ class MemberControllerTest {
     }
 
     @Test
-    void testGetMemberById() throws Exception {
+    void testGetMemberById() {
         // Get a member by ID (using a UUID from initial data)
         var memberResult = mockMvc.get().uri("/api/members/b0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11");
         assertThat(memberResult)

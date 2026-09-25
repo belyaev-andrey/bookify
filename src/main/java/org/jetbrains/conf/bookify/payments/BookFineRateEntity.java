@@ -72,4 +72,20 @@ class BookFineRateEntity implements Persistable<UUID> {
     public LocalDate getEffectiveDate() {
         return effectiveDate;
     }
+
+    public void setBookId(UUID bookId) {
+        this.bookId = bookId;
+    }
+
+    public void setPricePerDayOverdue(BigDecimal pricePerDayOverdue) {
+        this.pricePerDayOverdue = pricePerDayOverdue;
+    }
+
+    public void setEffectiveDate(LocalDate effectiveDate) {
+        this.effectiveDate = effectiveDate;
+    }
+
+    public void setNew(boolean aNew) {
+        isNew = aNew;
+    }
 }
