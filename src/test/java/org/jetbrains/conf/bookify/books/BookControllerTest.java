@@ -109,6 +109,39 @@ class BookControllerTest {
     }
 
     @Test
+    void testAddBookWithoutIsbnReturnsBadRequest() {
+        // A book needs a name and an ISBN; the response names the field that is missing
+        var addBookResult = mockMvc.post()
+                .uri("/api/books")
+                .header("Authorization", LIBRARIAN_AUTH)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"name\":\"Test Book\"}");
+
+        assertThat(addBookResult)
+                .hasStatus(HttpStatus.BAD_REQUEST)
+                .bodyJson()
+                .extractingPath("$.fields")
+                .asMap()
+                .containsOnlyKeys("isbn");
+    }
+
+    @Test
+    void testUpdateBookWithoutNameReturnsBadRequest() {
+        var updateBookResult = mockMvc.put()
+                .uri("/api/books")
+                .header("Authorization", LIBRARIAN_AUTH)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"id\":\"a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11\",\"isbn\":\"1234567890\"}");
+
+        assertThat(updateBookResult)
+                .hasStatus(HttpStatus.BAD_REQUEST)
+                .bodyJson()
+                .extractingPath("$.fields")
+                .asMap()
+                .containsOnlyKeys("name");
+    }
+
+    @Test
     void testRemoveBook() {
         var removeBookResult = mockMvc.delete()
                 .uri("/api/books/a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11")

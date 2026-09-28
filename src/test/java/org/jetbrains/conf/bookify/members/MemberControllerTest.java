@@ -88,6 +88,23 @@ class MemberControllerTest {
     }
 
     @Test
+    void testAddMemberWithoutPasswordReturnsBadRequest() {
+        // A member needs a name, an email and a password; the response names the field that is missing
+        var addMemberResult = mockMvc.post()
+                .uri("/api/members")
+                .header("Authorization", LIBRARIAN_AUTH)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"name\":\"Test Member\",\"email\":\"test@example.com\"}");
+
+        assertThat(addMemberResult)
+                .hasStatus(HttpStatus.BAD_REQUEST)
+                .bodyJson()
+                .extractingPath("$.fields")
+                .asMap()
+                .containsOnlyKeys("password");
+    }
+
+    @Test
     void testDisableMember() {
         // Disabling a member requires SUPERVISOR via @PreAuthorize on MemberService.disableMember,
         // in addition to the LIBRARIAN role the HTTP-level matcher checks - a plain librarian

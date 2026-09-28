@@ -1,4 +1,6 @@
 package org.jetbrains.conf.bookify.members;
 
-record MemberRequest(String name, String email, String password) {
+import jakarta.validation.constraints.NotBlank;
+
+record MemberRequest(@NotBlank String name, @NotBlank String email, @NotBlank String password) {
 }

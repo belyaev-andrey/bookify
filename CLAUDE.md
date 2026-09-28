@@ -118,6 +118,15 @@ the injected `Authentication` and takes a different branch if `ROLE_ADMIN` is al
 authorities `LIBRARIAN, ADMIN` (instead of a plain `LIBRARIAN` unlock) changes the response body, not just the status
 code — one seeded member (`Alice Cooper`) is disabled specifically so the difference is visible.
 
+### Request validation
+
+Request bodies are checked with Bean Validation (`@Valid` on the controller parameter): `BookRequest` and
+`BookUpdateRequest` need `name` and `isbn`, and `MemberRequest` needs `name`, `email` and `password` (all
+`@NotBlank`). `ErrorControllerAdvice.handleInvalidRequestBody` answers a failure with
+`400 {"error": "Invalid request body", "fields": {"<field>": "<message>"}}`. The same columns are `NOT NULL` in the
+database (`001-books.xml`, `003-members.xml`), which catches writes that bypass the API. The `main` branch behaves
+the same way.
+
 ### Configuration
 
 Business rules are externalized in `@ConfigurationProperties` classes — see "Configuration properties" under

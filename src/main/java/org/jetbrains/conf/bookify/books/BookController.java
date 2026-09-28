@@ -1,5 +1,6 @@
 package org.jetbrains.conf.bookify.books;
 
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -39,13 +40,13 @@ class BookController {
      * @return the added book
      */
     @PostMapping("")
-    ResponseEntity<Object> addBook(@RequestBody BookRequest request) {
+    ResponseEntity<Object> addBook(@Valid @RequestBody BookRequest request) {
         Book savedBook = bookService.saveBook(bookMapper.toEntity(request));
         return ResponseEntity.created(URI.create("/api/books/%s".formatted(savedBook.getId()))).build();
     }
 
     @PutMapping("")
-    public ResponseEntity<BookResponse> updateBook(@RequestBody BookUpdateRequest request) {
+    public ResponseEntity<BookResponse> updateBook(@Valid @RequestBody BookUpdateRequest request) {
         UUID id = request.id();
         if (id == null) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Book id is required");

@@ -1,5 +1,6 @@
 package org.jetbrains.conf.bookify.members;
 
+import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -61,7 +62,7 @@ class MemberController {
      * @return the added member
      */
     @PostMapping("")
-    ResponseEntity<Object> addMember(@RequestBody MemberRequest request) {
+    ResponseEntity<Object> addMember(@Valid @RequestBody MemberRequest request) {
         Member savedMember = memberService.addMember(memberMapper.toEntity(request));
         return ResponseEntity.created(URI.create("/api/members/%s".formatted(savedMember.getId()))).build();
     }

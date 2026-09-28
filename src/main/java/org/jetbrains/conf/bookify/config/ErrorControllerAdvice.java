@@ -8,7 +8,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.validation.FieldError;
 import org.springframework.web.ErrorResponse;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
@@ -17,6 +19,7 @@ import java.util.Arrays;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.TreeMap;
 
 @ControllerAdvice
 class ErrorControllerAdvice {
@@ -81,6 +84,21 @@ class ErrorControllerAdvice {
     public ResponseEntity<Map<String, Object>> handleUnreadableRequestBody(HttpMessageNotReadableException ex) {
         log.warn("Rejecting request with 400 Bad Request: {}", ex.getMessage());
         return ResponseEntity.badRequest().body(Map.of("error", "Malformed request body"));
+    }
+
+    /**
+     * Handle a request body that parsed but failed {@code @Valid} - a book without an ISBN, say. This
+     * one is an {@link ErrorResponse}, so the catch-all below would already answer 400, but with
+     * Spring's message, which quotes the handler's method signature. List the offending fields instead.
+     */
+    @ExceptionHandler(value = MethodArgumentNotValidException.class, produces = "application/json")
+    public ResponseEntity<Map<String, Object>> handleInvalidRequestBody(MethodArgumentNotValidException ex) {
+        log.warn("Rejecting request with 400 Bad Request: {}", ex.getMessage());
+        Map<String, String> fields = new TreeMap<>();
+        for (FieldError error : ex.getBindingResult().getFieldErrors()) {
+            fields.putIfAbsent(error.getField(), Objects.requireNonNullElse(error.getDefaultMessage(), "is invalid"));
+        }
+        return ResponseEntity.badRequest().body(Map.of("error", "Invalid request body", "fields", fields));
     }
 
     /**
