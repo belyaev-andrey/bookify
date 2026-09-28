@@ -181,6 +181,10 @@ Searches, borrowings and fine rates are not cached.
 Flyway manages schema migrations in `src/main/resources/db/migration/`. The dev profile also loads seed data from
 `src/main/resources/data/`. Tests use `src/test/resources/test-data/`.
 
+The overdue-return debug data (`Overdue Reader` holding `The Pragmatic Programmer` 20 days, plus a fine rate) is
+dev-only. It was first added as `db/migration/V13`, which ran in every profile. Since applied migrations can't be
+changed, `db/migration/V15` deletes those rows in every profile, and `data/V16` inserts them again for `dev`.
+
 Spring Modulith's event outbox uses `event_publication` and `event_publication_archive` tables, auto-created via
 `spring.modulith.events.jdbc.schema-initialization.enabled`. It's explicitly set in `application-test.properties` (so
 tests always have the tables); it's commented out in `application-dev.properties` — check it before relying on
