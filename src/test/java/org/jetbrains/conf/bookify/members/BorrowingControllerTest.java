@@ -73,13 +73,19 @@ class BorrowingControllerTest {
             // Verify the borrowing status is now APPROVED (assuming the book is available in the test database)
             assertThat(borrowing.getStatus()).isEqualTo(BorrowingStatus.APPROVED);
 
-            // 4. Get the borrowing by ID
+            // 4. Get the borrowing by ID; the response carries the IDs of the book and member
             var getBorrowingResult = mockMvc.get()
-                    .uri("/api/borrowings/" + borrowingId);
+                    .uri("/api/borrowings/" + borrowingId)
+                    .exchange();
 
             assertThat(getBorrowingResult)
-                    .hasStatus(HttpStatus.OK)
-                    .bodyJson();
+                    .hasStatus(HttpStatus.OK);
+            assertThat(getBorrowingResult).bodyJson()
+                    .extractingPath("$.bookId").isEqualTo(TEST_BOOK_ID.toString());
+            assertThat(getBorrowingResult).bodyJson()
+                    .extractingPath("$.requestedBookId").isEqualTo(TEST_BOOK_ID.toString());
+            assertThat(getBorrowingResult).bodyJson()
+                    .extractingPath("$.memberId").isEqualTo(memberId.toString());
 
             // 5. Get all borrowings for the member
             var getMemberBorrowingsResult = mockMvc.get()
@@ -158,6 +164,13 @@ class BorrowingControllerTest {
             // Verify that the requestedBookId field is set to the non-existent book ID and the bookId field is null
             assertThat(borrowing.getRequestedBookId()).isEqualTo(nonExistentBookId);
             assertThat(borrowing.getBookId()).isNull();
+
+            // The API reports the requested ID as well
+            assertThat(mockMvc.get().uri("/api/borrowings/" + borrowingId))
+                    .hasStatus(HttpStatus.OK)
+                    .bodyJson()
+                    .extractingPath("$.requestedBookId")
+                    .isEqualTo(nonExistentBookId.toString());
         } finally {
             // Clean up
             List<Borrowing> borrowings = borrowingRepository.findByMemberId(memberId);

@@ -9,6 +9,11 @@ import org.springframework.context.annotation.Import;
 import org.springframework.modulith.core.ApplicationModules;
 import org.springframework.test.context.ActiveProfiles;
 
+import java.util.Objects;
+import java.util.UUID;
+
+import static org.assertj.core.api.Assertions.assertThat;
+
 @SpringBootTest
 @Import(DbConfiguration.class)
 @ActiveProfiles("test")
@@ -16,6 +21,9 @@ class BooksModuleTests {
 
     @Autowired
     private BookService bookService;
+
+    @Autowired
+    private BookRepository bookRepository;
 
     @Test
     void verifyModuleStructure() {
@@ -25,9 +33,18 @@ class BooksModuleTests {
 
     @Test
     void shouldAddBook() {
-        // This test verifies that the books module can add a book
-        // It's a placeholder for a more comprehensive test
-        Book book = new Book(null, "Test Book", "1234567890", true);
-        bookService.saveBook(book);
+        // The books module can add a book, and the book is stored
+        Book saved = bookService.saveBook(new Book(null, "Test Book", "1234567890", true));
+        UUID bookId = Objects.requireNonNull(saved.getId());
+
+        try {
+            // Read through the repository: findById would answer from the cache that saveBook filled
+            assertThat(bookRepository.findById(bookId))
+                    .get()
+                    .extracting(Book::getName, Book::getIsbn, Book::isAvailable)
+                    .containsExactly("Test Book", "1234567890", true);
+        } finally {
+            bookRepository.deleteById(bookId);
+        }
     }
 }
