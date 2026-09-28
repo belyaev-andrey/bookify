@@ -113,6 +113,7 @@ class MemberCachingTest {
         Member member = new Member();
         member.setName("Cache Test Member");
         member.setEmail("cache-test-" + UUID.randomUUID() + "@example.com");
+        member.setPassword("password");
         member.setEnabled(true);
         return member;
     }

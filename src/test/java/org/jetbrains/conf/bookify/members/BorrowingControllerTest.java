@@ -43,6 +43,7 @@ class BorrowingControllerTest {
         Member member = new Member();
         member.setName("Test Member");
         member.setEmail("test@example.com");
+        member.setPassword("password");
         member.setEnabled(true);
         Member savedMember = memberRepository.save(member);
         UUID memberId = savedMember.getId();
@@ -122,6 +123,7 @@ class BorrowingControllerTest {
         Member member = new Member();
         member.setName("Test Member 2");
         member.setEmail("test2@example.com");
+        member.setPassword("password");
         member.setEnabled(true);
         Member savedMember = memberRepository.save(member);
         UUID memberId = savedMember.getId();
@@ -183,6 +185,7 @@ class BorrowingControllerTest {
         Member member = new Member();
         member.setName("Disabled Member");
         member.setEmail("disabled@example.com");
+        member.setPassword("password");
         member.setEnabled(false);
         Member savedMember = memberRepository.save(member);
         UUID memberId = savedMember.getId();

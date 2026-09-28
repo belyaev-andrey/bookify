@@ -70,6 +70,7 @@ class BorrowingServiceTest {
         Member newMember = new Member();
         newMember.setName("New Eligible Member");
         newMember.setEmail("eligible@test.com");
+        newMember.setPassword("password");
         newMember.setEnabled(true);
         Member savedMember = memberRepository.save(newMember);
         UUID memberId = savedMember.getId();
@@ -111,6 +112,7 @@ class BorrowingServiceTest {
         Member disabledMember = new Member();
         disabledMember.setName("Disabled User");
         disabledMember.setEmail("disabled@test.com");
+        disabledMember.setPassword("password");
         disabledMember.setEnabled(false);
         Member savedMember = memberRepository.save(disabledMember);
         UUID memberId = savedMember.getId();
@@ -133,6 +135,7 @@ class BorrowingServiceTest {
         Member member = new Member();
         member.setName("Heavy Reader");
         member.setEmail("heavyreader@test.com");
+        member.setPassword("password");
         member.setEnabled(true);
         Member savedMember = memberRepository.save(member);
         UUID memberId = savedMember.getId();
@@ -175,6 +178,7 @@ class BorrowingServiceTest {
         Member member = new Member();
         member.setName("Late Returner");
         member.setEmail("late@test.com");
+        member.setPassword("password");
         member.setEnabled(true);
         Member savedMember = memberRepository.save(member);
         UUID memberId = savedMember.getId();
@@ -211,6 +215,7 @@ class BorrowingServiceTest {
         Member member = new Member();
         member.setName("On Time Reader");
         member.setEmail("ontime@test.com");
+        member.setPassword("password");
         member.setEnabled(true);
         Member savedMember = memberRepository.save(member);
         UUID memberId = savedMember.getId();
@@ -259,6 +264,7 @@ class BorrowingServiceTest {
         Member testMember = new Member();
         testMember.setName("Event Test Member");
         testMember.setEmail("eventmember@test.com");
+        testMember.setPassword("password");
         testMember.setEnabled(true);
         Member savedMember = memberRepository.save(testMember);
 
@@ -306,6 +312,7 @@ class BorrowingServiceTest {
         Member testMember = new Member();
         testMember.setName("Event Test Member 2");
         testMember.setEmail("eventmember2@test.com");
+        testMember.setPassword("password");
         testMember.setEnabled(true);
         Member savedMember = memberRepository.save(testMember);
 
@@ -443,6 +450,7 @@ class BorrowingServiceTest {
         Member member = new Member();
         member.setName("Rejected Returner");
         member.setEmail("rejectedreturn@test.com");
+        member.setPassword("password");
         member.setEnabled(true);
         Member savedMember = memberRepository.save(member);
         UUID memberId = savedMember.getId();
@@ -478,6 +486,7 @@ class BorrowingServiceTest {
         Member member = new Member();
         member.setName("Rejected With Book");
         member.setEmail("rejectedwithbook@test.com");
+        member.setPassword("password");
         member.setEnabled(true);
         Member savedMember = memberRepository.save(member);
         UUID memberId = savedMember.getId();
@@ -511,6 +520,7 @@ class BorrowingServiceTest {
         Member testMember = new Member();
         testMember.setName("Book Borrower");
         testMember.setEmail("borrower@test.com");
+        testMember.setPassword("password");
         testMember.setEnabled(true);
         Member savedTestMember = memberRepository.save(testMember);
 
@@ -549,6 +559,7 @@ class BorrowingServiceTest {
         Member testMember = new Member();
         testMember.setName("Returner");
         testMember.setEmail("returner@test.com");
+        testMember.setPassword("password");
         testMember.setEnabled(true);
         Member savedTestMember = memberRepository.save(testMember);
 
@@ -620,6 +631,7 @@ class BorrowingServiceTest {
         Member newMember = new Member();
         newMember.setName("New Member");
         newMember.setEmail("new@test.com");
+        newMember.setPassword("password");
         newMember.setEnabled(true);
         Member saved = memberRepository.save(newMember);
 
@@ -664,6 +676,7 @@ class BorrowingServiceTest {
         Member newMember = new Member();
         newMember.setName("Eligible Member");
         newMember.setEmail("eligiblemember@test.com");
+        newMember.setPassword("password");
         newMember.setEnabled(true);
         Member savedMember = memberRepository.save(newMember);
 
@@ -696,6 +709,7 @@ class BorrowingServiceTest {
         Member disabledMember = new Member();
         disabledMember.setName("Disabled User");
         disabledMember.setEmail("disabled2@test.com");
+        disabledMember.setPassword("password");
         disabledMember.setEnabled(false);
         Member saved = memberRepository.save(disabledMember);
 
@@ -716,6 +730,7 @@ class BorrowingServiceTest {
         Member member = new Member();
         member.setName("Max Borrower");
         member.setEmail("maxborrower@test.com");
+        member.setPassword("password");
         member.setEnabled(true);
         Member savedMember = memberRepository.save(member);
 
@@ -757,6 +772,7 @@ class BorrowingServiceTest {
         Member member = new Member();
         member.setName("Overdue User");
         member.setEmail("overdue@test.com");
+        member.setPassword("password");
         member.setEnabled(true);
         Member savedMember = memberRepository.save(member);
 
@@ -792,6 +808,7 @@ class BorrowingServiceTest {
         Member member = new Member();
         member.setName("Regular User");
         member.setEmail("regular@test.com");
+        member.setPassword("password");
         member.setEnabled(true);
         Member savedMember = memberRepository.save(member);
 
@@ -834,6 +851,7 @@ class BorrowingServiceTest {
         Member member = new Member();
         member.setName("Pending Requester");
         member.setEmail("pending@test.com");
+        member.setPassword("password");
         member.setEnabled(true);
         Member savedMember = memberRepository.save(member);
 
@@ -872,6 +890,7 @@ class BorrowingServiceTest {
         Member member = new Member();
         member.setName("Rejected Requester");
         member.setEmail("rejected@test.com");
+        member.setPassword("password");
         member.setEnabled(true);
         Member savedMember = memberRepository.save(member);
 
