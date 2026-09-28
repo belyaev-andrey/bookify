@@ -187,7 +187,9 @@ Searches, borrowings and fine rates are not cached.
 Liquibase manages schema migrations as XML changelogs in `src/main/resources/db/changelog/`. Every migration is its
 own file, numbered in execution order (`001-books.xml`, `002-books-data.xml`, ...), and the main changelog
 (`db.changelog-master.xml`) includes each of them via `<include>`. Structural changesets have no context and always
-run regardless of the active context; seed-data changesets are tagged `context="dev"`.
+run regardless of the active context; seed-data changesets are tagged `context="dev"`. That includes the overdue-return
+debug data (`013-overdue-return-debug-data.xml`: `Overdue Reader` holding `The Pragmatic Programmer` 20 days, plus a
+fine rate), which `main` also loads in `dev` only.
 
 Liquibase's context filter only *excludes* something when the active contexts are non-empty and don't match — leaving
 `spring.liquibase.contexts` unset runs every changeset, tagged or not. So every profile sets an explicit context:

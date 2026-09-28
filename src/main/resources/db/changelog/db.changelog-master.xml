@@ -16,5 +16,6 @@
     <include file="010-modulith-events.xml" relativeToChangelogFile="true"/>
     <include file="011-inactive-member-data.xml" relativeToChangelogFile="true"/>
     <include file="012-payments.xml" relativeToChangelogFile="true"/>
+    <include file="013-overdue-return-debug-data.xml" relativeToChangelogFile="true"/>
 
 </databaseChangeLog>

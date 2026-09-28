@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                    http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <!-- Reproducible data for debugging the overdue-return payment flow, the same rows as main's
+         data/V16__overdue_return_debug_data.sql. The loan is 20 days old; with bookify.overdue.days=14
+         it is 6 days overdue. -->
+    <changeSet id="013-overdue-return-debug-data" author="bookify" context="dev">
+        <insert tableName="book">
+            <column name="id" value="a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a16"/>
+            <column name="name" value="The Pragmatic Programmer"/>
+            <column name="isbn" value="9780135957059"/>
+            <column name="available" valueBoolean="false"/>
+        </insert>
+        <insert tableName="member">
+            <column name="id" value="b0eebc99-9c0b-4ef8-bb6d-6bb9bd380a15"/>
+            <column name="name" value="Overdue Reader"/>
+            <column name="email" value="overdue.reader@example.com"/>
+            <column name="password" value="password"/>
+            <column name="enabled" valueBoolean="true"/>
+        </insert>
+        <!-- Raw SQL rather than <insert>: Liquibase replaces a valueComputed that starts with CURRENT_TIMESTAMP or
+             CURRENT_DATE with the plain current-time function, silently dropping the "- 20 days" part. -->
+        <sql>
+            INSERT INTO borrowing (id, book_id, requested_book_id, member_id, borrow_date, return_date, status)
+            VALUES ('550e8400-e29b-41d4-a716-446655440030',
+                    'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a16',
+                    'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a16',
+                    'b0eebc99-9c0b-4ef8-bb6d-6bb9bd380a15',
+                    CURRENT_TIMESTAMP - INTERVAL '20 days', NULL, 'APPROVED');
+
+            INSERT INTO book_fine_rate (id, book_id, price_per_day_overdue, effective_date)
+            VALUES ('c0eebc99-9c0b-4ef8-bb6d-6bb9bd380a05',
+                    'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a16', 2.50, CURRENT_DATE - 30);
+        </sql>
+    </changeSet>
+
+</databaseChangeLog>

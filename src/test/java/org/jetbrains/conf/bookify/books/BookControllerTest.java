@@ -43,6 +43,14 @@ class BookControllerTest {
     }
 
     @Test
+    void testOverdueDebugBookIsNotSeededOutsideDev() {
+        // The overdue-return debug data (The Pragmatic Programmer, borrowed by Overdue Reader) is dev-only seed data
+        var booksRequestResult = mockMvc.get().uri("/api/books/a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a16");
+        assertThat(booksRequestResult)
+                .hasStatus(HttpStatus.NOT_FOUND);
+    }
+
+    @Test
     void testFetchNonExistingById() {
         var booksRequestResult = mockMvc.get().uri("/api/books/00000000-0000-0000-0000-000000000000");
         assertThat(booksRequestResult)
