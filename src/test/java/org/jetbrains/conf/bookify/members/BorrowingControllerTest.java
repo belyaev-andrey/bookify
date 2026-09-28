@@ -75,13 +75,19 @@ class BorrowingControllerTest {
             // Verify the borrowing status is now APPROVED (assuming the book is available in the test database)
             assertThat(borrowing.getStatus()).isEqualTo(BorrowingStatus.APPROVED);
 
-            // 4. Get the borrowing by ID
+            // 4. Get the borrowing by ID; the response carries the IDs of the book and member
             var getBorrowingResult = mockMvc.get()
-                    .uri("/api/borrowings/" + borrowingId);
+                    .uri("/api/borrowings/" + borrowingId)
+                    .exchange();
 
             assertThat(getBorrowingResult)
-                    .hasStatus(HttpStatus.OK)
-                    .bodyJson();
+                    .hasStatus(HttpStatus.OK);
+            assertThat(getBorrowingResult).bodyJson()
+                    .extractingPath("$.bookId").isEqualTo(TEST_BOOK_ID.toString());
+            assertThat(getBorrowingResult).bodyJson()
+                    .extractingPath("$.requestedBookId").isEqualTo(TEST_BOOK_ID.toString());
+            assertThat(getBorrowingResult).bodyJson()
+                    .extractingPath("$.memberId").isEqualTo(memberId.toString());
 
             // 5. Get all borrowings for the member
             var getMemberBorrowingsResult = mockMvc.get()
@@ -134,12 +140,12 @@ class BorrowingControllerTest {
             // Use a non-existent book ID to simulate a book that is not available
             UUID nonExistentBookId = UUID.randomUUID();
 
-            // 2. Create a borrowing request for a non-existent book.
-            // The response serialization may fail (500) when the proxy for the non-existent book is accessed,
-            // but the borrowing IS committed to the DB before serialization occurs.
-            mockMvc.post()
-                    .uri("/api/borrowings/borrow?bookId=" + nonExistentBookId + "&memberId=" + memberId)
-                    .exchange();
+            // 2. Create a borrowing request for a non-existent book
+            var borrowRequestResult = mockMvc.post()
+                    .uri("/api/borrowings/borrow?bookId=" + nonExistentBookId + "&memberId=" + memberId);
+
+            assertThat(borrowRequestResult)
+                    .hasStatus(HttpStatus.CREATED);
 
             // Get the borrowing ID from the repository
             List<Borrowing> borrowings = borrowingRepository.findByMemberId(memberId);
@@ -157,9 +163,18 @@ class BorrowingControllerTest {
             // Verify the borrowing status is now REJECTED (since the book doesn't exist)
             assertThat(borrowing.getStatus()).isEqualTo(BorrowingStatus.REJECTED);
 
-            // requestedBook is null because the non-existent book cannot be resolved via LEFT JOIN
+            // Verify that requestedBookId is set to the non-existent book ID and the book field is null.
+            // requestedBook itself loads as null, since there is no book to join.
+            assertThat(borrowing.getRequestedBookId()).isEqualTo(nonExistentBookId);
             assertThat(borrowing.getRequestedBook()).isNull();
             assertThat(borrowing.getBook()).isNull();
+
+            // The API reports the requested ID as well
+            assertThat(mockMvc.get().uri("/api/borrowings/" + borrowingId))
+                    .hasStatus(HttpStatus.OK)
+                    .bodyJson()
+                    .extractingPath("$.requestedBookId")
+                    .isEqualTo(nonExistentBookId.toString());
         } finally {
             // Clean up
             List<Borrowing> borrowings = borrowingRepository.findByMemberId(memberId);

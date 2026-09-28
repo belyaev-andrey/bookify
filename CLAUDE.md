@@ -60,8 +60,10 @@ The persistence-layer shape of entities/repositories is not copy-paste compatibl
 4. `BorrowingService.returnBook()` — sets `RETURNED` + `returnDate`, publishes `BookReturnedEvent`
 5. `BookService.handleBookReturnedEvent()` — marks book available again
 
-The `Borrowing` entity has two book references: `requestedBook` (always set, the originally requested book) and `book`
-(only set on `APPROVED`, the actually borrowed book).
+The `Borrowing` entity has two book references: `requestedBook` (the originally requested book) and `book` (only set on
+`APPROVED`, the actually borrowed book). A request may name a book that doesn't exist, in which case `requestedBook`
+loads as `null`. `requestedBookId`, a read-only mapping of the same `requested_book_id` column, still holds the ID, and
+that's what `BorrowingResponse` reports, as on `main`.
 
 ### Startup ordering
 

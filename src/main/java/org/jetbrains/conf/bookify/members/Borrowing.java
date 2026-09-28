@@ -30,6 +30,11 @@ class Borrowing implements Persistable<@NonNull UUID> {
     @JoinColumn(name = "requested_book_id")
     private Book requestedBook;
 
+    // Read-only view of the same column. A request may name a book that doesn't exist; requestedBook then loads as
+    // null, but the ID it asked for is still in the row.
+    @Column(name = "requested_book_id", insertable = false, updatable = false)
+    private UUID requestedBookId;
+
     @ManyToOne(fetch = FetchType.EAGER, optional = false)
     @JoinColumn(name = "member_id")
     private Member member;
@@ -49,6 +54,7 @@ class Borrowing implements Persistable<@NonNull UUID> {
         this.id = id;
         this.book = book;
         this.requestedBook = requestedBook;
+        this.requestedBookId = requestedBook == null ? null : requestedBook.getId();
         this.member = member;
         this.borrowDate = borrowDate;
         this.returnDate = returnDate;
@@ -83,6 +89,16 @@ class Borrowing implements Persistable<@NonNull UUID> {
 
     public void setRequestedBook(Book requestedBook) {
         this.requestedBook = requestedBook;
+        this.requestedBookId = requestedBook == null ? null : requestedBook.getId();
+    }
+
+    /**
+     * Gets the ID of the originally requested book. Unlike {@link #getRequestedBook()}, this is set even when that
+     * book doesn't exist.
+     * @return the requested book ID
+     */
+    public UUID getRequestedBookId() {
+        return requestedBookId;
     }
 
     public Member getMember() {
