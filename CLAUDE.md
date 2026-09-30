@@ -98,7 +98,10 @@ stored in the database and managed via `JdbcUserDetailsManager`.
 Two `SecurityFilterChain` beans exist in `SecurityConfig`: the default one above is active unless the
 `strict-security` Spring profile is on, in which case a stricter variant requires `ADMIN` instead of `LIBRARIAN` for
 the same endpoints — reading the source alone doesn't tell you which is enforced at runtime; that depends on the
-active profile. `BookService.removeBook` is additionally guarded by `@PreAuthorize("hasRole('LIBRARIAN')")`
+active profile. `StrictSecurityTest` is the only place that turns the profile on, and it does so through
+`@ActiveProfiles({"test", "strict-security"})`, not `spring.profiles.active`. So its context autowires
+`strictSecurityFilterChain` as the single `SecurityFilterChain`, and every other test (just `"test"`) gets the
+default chain. `BookService.removeBook` is additionally guarded by `@PreAuthorize("hasRole('LIBRARIAN')")`
 (`@EnableMethodSecurity` is on), demonstrating that unlocking the HTTP-level rule also satisfies the method-level one,
 since both layers require the same role.
 
