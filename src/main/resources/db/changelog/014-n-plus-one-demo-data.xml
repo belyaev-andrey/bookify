@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                    http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <!-- Bulk data for observing the N+1 selects caused by Borrowing's EAGER book/requestedBook/member associations.
+         GET /api/borrowings loads ~4,000 borrowings and then selects ~2,000 books and ~200 members one by one;
+         GET /api/borrowings/member/b0eebc99-9c0b-4ef8-bb6d-6bb9bd380a20 (N+1 Heavy Reader) selects 1,000 books one
+         by one. Every borrowing is RETURNED, so books stay available and no member is over the limit or overdue.
+         Raw SQL with generate_series rather than thousands of <insert>s; md5-derived UUIDs keep the ids stable. -->
+    <changeSet id="014-n-plus-one-demo-data" author="bookify" context="dev">
+        <sql>
+            INSERT INTO book (id, name, isbn, available)
+            SELECT md5('n1-book-' || g)::uuid,
+                   'N+1 Demo Book ' || lpad(g::text, 4, '0'),
+                   '978' || lpad(g::text, 10, '0'),
+                   TRUE
+            FROM generate_series(1, 2000) AS g;
+
+            INSERT INTO member (id, name, email, password, enabled)
+            SELECT md5('n1-member-' || g)::uuid,
+                   'N+1 Demo Member ' || lpad(g::text, 3, '0'),
+                   'n1.member.' || g || '@example.com',
+                   'password',
+                   TRUE
+            FROM generate_series(1, 200) AS g;
+
+            INSERT INTO member (id, name, email, password, enabled)
+            VALUES ('b0eebc99-9c0b-4ef8-bb6d-6bb9bd380a20', 'N+1 Heavy Reader', 'n1.heavy.reader@example.com',
+                    'password', TRUE);
+
+            -- 1,000 loans for the heavy reader, each of a different book.
+            INSERT INTO borrowing (id, book_id, requested_book_id, member_id, borrow_date, return_date, status)
+            SELECT md5('n1-heavy-borrowing-' || g)::uuid,
+                   md5('n1-book-' || g)::uuid,
+                   md5('n1-book-' || g)::uuid,
+                   'b0eebc99-9c0b-4ef8-bb6d-6bb9bd380a20',
+                   TIMESTAMP '2023-01-01 10:00:00' + g * INTERVAL '1 hour',
+                   TIMESTAMP '2023-01-08 10:00:00' + g * INTERVAL '1 hour',
+                   'RETURNED'
+            FROM generate_series(1, 1000) AS g;
+
+            -- 3,000 loans spread over the 200 demo members and all 2,000 demo books.
+            INSERT INTO borrowing (id, book_id, requested_book_id, member_id, borrow_date, return_date, status)
+            SELECT md5('n1-borrowing-' || g)::uuid,
+                   md5('n1-book-' || (((g - 1) % 2000) + 1))::uuid,
+                   md5('n1-book-' || (((g - 1) % 2000) + 1))::uuid,
+                   md5('n1-member-' || (((g - 1) % 200) + 1))::uuid,
+                   TIMESTAMP '2023-06-01 10:00:00' + g * INTERVAL '1 hour',
+                   TIMESTAMP '2023-06-08 10:00:00' + g * INTERVAL '1 hour',
+                   'RETURNED'
+            FROM generate_series(1, 3000) AS g;
+        </sql>
+    </changeSet>
+
+</databaseChangeLog>

@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                    http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <!-- Bulk data for observing long transactions in queries that have no index to use. Only the primary keys are
+         indexed, so with these volumes the following run as sequential scans:
+         - book search (lower(name) LIKE '%...%' ORDER BY name) over ~300,000 books;
+         - member search by name or email over ~100,000 members;
+         - the borrow eligibility check (borrowing.member_id) inside BorrowingService.borrowBook's write
+           transaction, and the outstanding-loan lookup (borrowing.book_id) inside returnBook's, over ~1,000,000
+           borrowings - the same scan also backs the foreign-key check when a book is deleted;
+         - the fine rate lookup (book_id, effective_date) in PaymentService.handleAssignFine over ~500,000 rates.
+         The extra borrowings reuse the 2,000 books and 200 members of 014-n-plus-one-demo-data, so the number of
+         N+1 selects behind GET /api/borrowings stays the same; only its row count grows. Every borrowing is
+         RETURNED and every book available, so borrowing and returning still work as before. -->
+    <changeSet id="015-long-transaction-demo-data" author="bookify" context="dev">
+        <sql>
+            INSERT INTO book (id, name, isbn, available)
+            SELECT md5('lt-book-' || g)::uuid,
+                   'Catalogue Volume ' || lpad(g::text, 6, '0'),
+                   '979' || lpad(g::text, 10, '0'),
+                   TRUE
+            FROM generate_series(1, 300000) AS g;
+
+            INSERT INTO member (id, name, email, password, enabled)
+            SELECT md5('lt-member-' || g)::uuid,
+                   'Registered Reader ' || lpad(g::text, 6, '0'),
+                   'reader.' || g || '@library.example.com',
+                   'password',
+                   TRUE
+            FROM generate_series(1, 100000) AS g;
+
+            INSERT INTO borrowing (id, book_id, requested_book_id, member_id, borrow_date, return_date, status)
+            SELECT md5('lt-borrowing-' || g)::uuid,
+                   md5('n1-book-' || (((g - 1) % 2000) + 1))::uuid,
+                   md5('n1-book-' || (((g - 1) % 2000) + 1))::uuid,
+                   md5('n1-member-' || (((g - 1) % 200) + 1))::uuid,
+                   TIMESTAMP '2020-01-01 10:00:00' + g * INTERVAL '1 minute',
+                   TIMESTAMP '2020-01-08 10:00:00' + g * INTERVAL '1 minute',
+                   'RETURNED'
+            FROM generate_series(1, 1000000) AS g;
+
+            INSERT INTO book_fine_rate (id, book_id, price_per_day_overdue, effective_date)
+            SELECT md5('lt-fine-rate-' || g)::uuid,
+                   md5('lt-book-' || (((g - 1) % 300000) + 1))::uuid,
+                   0.50 + (g % 10) * 0.25,
+                   DATE '2020-01-01' + (g % 1500)
+            FROM generate_series(1, 500000) AS g;
+
+            ANALYZE book;
+            ANALYZE member;
+            ANALYZE borrowing;
+            ANALYZE book_fine_rate;
+        </sql>
+    </changeSet>
+
+</databaseChangeLog>

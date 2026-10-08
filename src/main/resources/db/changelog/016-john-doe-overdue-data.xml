@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                    http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <!-- John Doe holds three overdue books, so the overdue check in BorrowingService.findIneligibilityReason
+         (member_id = ? AND status = 'APPROVED' AND borrow_date < now - bookify.overdue.days) finds rows, and his
+         borrow requests are rejected with HAS_OVERDUE_BOOKS. Three active loans stay below the borrowing limit (5),
+         so the overdue check is the one that rejects him. Borrow dates are relative, so the loans stay overdue. -->
+    <changeSet id="016-john-doe-overdue-data" author="bookify" context="dev">
+        <insert tableName="book">
+            <column name="id" value="a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a17"/>
+            <column name="name" value="Dune"/>
+            <column name="isbn" value="9780441172719"/>
+            <column name="available" valueBoolean="false"/>
+        </insert>
+        <insert tableName="book">
+            <column name="id" value="a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a18"/>
+            <column name="name" value="Clean Code"/>
+            <column name="isbn" value="9780132350884"/>
+            <column name="available" valueBoolean="false"/>
+        </insert>
+        <insert tableName="book">
+            <column name="id" value="a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a19"/>
+            <column name="name" value="Refactoring"/>
+            <column name="isbn" value="9780134757599"/>
+            <column name="available" valueBoolean="false"/>
+        </insert>
+        <!-- Raw SQL rather than <insert>, as in 013: Liquibase drops the "- N days" part of a valueComputed that
+             starts with CURRENT_TIMESTAMP. -->
+        <sql>
+            INSERT INTO borrowing (id, book_id, requested_book_id, member_id, borrow_date, return_date, status)
+            VALUES ('550e8400-e29b-41d4-a716-446655440031',
+                    'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a17',
+                    'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a17',
+                    'b0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11',
+                    CURRENT_TIMESTAMP - INTERVAL '30 days', NULL, 'APPROVED'),
+                   ('550e8400-e29b-41d4-a716-446655440032',
+                    'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a18',
+                    'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a18',
+                    'b0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11',
+                    CURRENT_TIMESTAMP - INTERVAL '25 days', NULL, 'APPROVED'),
+                   ('550e8400-e29b-41d4-a716-446655440033',
+                    'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a19',
+                    'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a19',
+                    'b0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11',
+                    CURRENT_TIMESTAMP - INTERVAL '20 days', NULL, 'APPROVED');
+        </sql>
+    </changeSet>
+
+</databaseChangeLog>

@@ -17,5 +17,8 @@
     <include file="011-inactive-member-data.xml" relativeToChangelogFile="true"/>
     <include file="012-payments.xml" relativeToChangelogFile="true"/>
     <include file="013-overdue-return-debug-data.xml" relativeToChangelogFile="true"/>
+    <include file="014-n-plus-one-demo-data.xml" relativeToChangelogFile="true"/>
+    <include file="015-long-transaction-demo-data.xml" relativeToChangelogFile="true"/>
+    <include file="016-john-doe-overdue-data.xml" relativeToChangelogFile="true"/>
 
 </databaseChangeLog>
