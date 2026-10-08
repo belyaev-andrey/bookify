@@ -16,7 +16,6 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -215,10 +214,8 @@ class BorrowingService {
         // more than the configured number of days; a PENDING request has no borrow date yet, so it
         // is still in flight rather than overdue.
         LocalDateTime overdueBefore = LocalDateTime.now().minusDays(bookifySettingsConfig.getOverdueDays());
-        boolean hasOverdueBooks = activeBorrowings.stream()
-                .map(Borrowing::getBorrowDate)
-                .filter(Objects::nonNull)
-                .anyMatch(borrowDate -> borrowDate.isBefore(overdueBefore));
+        boolean hasOverdueBooks = borrowingRepository.existsByMemberIdAndStatusAndBorrowDateBefore(
+                memberId, BorrowingStatus.APPROVED, overdueBefore);
         return hasOverdueBooks
                 ? Optional.of(BorrowNotAllowedException.Reason.HAS_OVERDUE_BOOKS)
                 : Optional.empty();

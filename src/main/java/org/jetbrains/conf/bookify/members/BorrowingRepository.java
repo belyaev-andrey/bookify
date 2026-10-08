@@ -3,6 +3,7 @@ package org.jetbrains.conf.bookify.members;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.repository.ListCrudRepository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -34,6 +35,21 @@ interface BorrowingRepository extends ListCrudRepository<Borrowing, UUID> {
      * @return a list of active borrowings for the member
      */
     List<Borrowing> findByMemberIdAndReturnDateIsNullAndStatusNot(UUID memberId, BorrowingStatus excludedStatus);
+
+    /**
+     * Check whether a member holds a book borrowed before the given moment, i.e. an overdue one.
+     *
+     * <p>Only {@code APPROVED} borrowings put a book in the member's hands: a {@code PENDING}
+     * request has no borrow date yet, and a {@code REJECTED} one never gets one. Returning a book
+     * moves its borrowing to {@code RETURNED}, so an approved borrowing is never a returned one.
+     *
+     * @param memberId the ID of the member
+     * @param status the status of a borrowing whose book the member holds
+     * @param borrowedBefore the moment before which a held book counts as overdue
+     * @return true if the member holds such a book, false otherwise
+     */
+    boolean existsByMemberIdAndStatusAndBorrowDateBefore(UUID memberId, BorrowingStatus status,
+                                                         LocalDateTime borrowedBefore);
 
     /**
      * Find the outstanding borrowing for a specific book, if any: one that was approved and has
