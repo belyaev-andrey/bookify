@@ -1,11 +1,13 @@
 # 1. Query with many parameters: UUIDs, a timestamp and an enum
 # John Doe borrows The Lord of the Rings.
 ###
-POST http://localhost:8081/api/borrowings/borrow?bookId=a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11&memberId=b0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11
+POST http://localhost:8081/api/borrowings/borrow?
+    bookId=a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11&memberId=b0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11
 
 # Optional, one-shot: Overdue Reader returns The Pragmatic Programmer 6 days late.
 ###
-POST http://localhost:8081/api/borrowings/return?bookId=a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a16&memberId=b0eebc99-9c0b-4ef8-bb6d-6bb9bd380a15
+POST http://localhost:8081/api/borrowings/return?
+    bookId=a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a16&memberId=b0eebc99-9c0b-4ef8-bb6d-6bb9bd380a15
 
 # 2. N+1 query
 # Active borrowings of John Doe
@@ -14,16 +16,19 @@ GET http://localhost:8081/api/borrowings/member/b0eebc99-9c0b-4ef8-bb6d-6bb9bd38
 
 # 3. Long-running query
 ###
-GET http://localhost:8081/api/books/search?name=volume
+GET http://localhost:8081/api/books/search?
+    name=volume
 
 # 4. Several different queries in one transaction
 # Setup: Jane Smith borrows The Lord of the Rings
 ###
-POST http://localhost:8081/api/borrowings/borrow?bookId=a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11&memberId=b0eebc99-9c0b-4ef8-bb6d-6bb9bd380a12
+POST http://localhost:8081/api/borrowings/borrow?
+    bookId=a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11&memberId=b0eebc99-9c0b-4ef8-bb6d-6bb9bd380a12
 
 # Jane Smith returns The Lord of the Rings (run the setup request first; the pair can be repeated)
 ###
-POST http://localhost:8081/api/borrowings/return?bookId=a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11&memberId=b0eebc99-9c0b-4ef8-bb6d-6bb9bd380a12
+POST http://localhost:8081/api/borrowings/return?
+    bookId=a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11&memberId=b0eebc99-9c0b-4ef8-bb6d-6bb9bd380a12
 
 # Delete a book by ID and name
 ###
