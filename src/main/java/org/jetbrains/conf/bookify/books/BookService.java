@@ -60,7 +60,7 @@ class BookService {
      * @throws BookDeleteException if the book has borrowing records (active or historical)
      */
     @Transactional
-    @PreAuthorize("hasRole('LIBRARIAN')")
+    @PreAuthorize("hasRole('LIBRARIAN_ADMIN')")
     @Caching(evict = {
             @CacheEvict(cacheNames = BOOKS_CACHE, key = "#id"),
             @CacheEvict(cacheNames = ALL_BOOKS_CACHE, allEntries = true)
