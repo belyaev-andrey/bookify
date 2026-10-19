@@ -17,7 +17,7 @@ import java.util.UUID;
  * {@code BOOKIFY_PAYMENTS_PROVIDER}), pointed at {@code bookify.payments.production.*}.
  */
 @Component
-@ConditionalOnProperty(prefix = "bookify.payments", name = "provider", havingValue = "production")
+@ConditionalOnProperty(prefix = "bookify.payments", name = "provider")
 class ProductionPaymentProvider implements PaymentProvider {
 
     private static final Logger log = LoggerFactory.getLogger(ProductionPaymentProvider.class);
