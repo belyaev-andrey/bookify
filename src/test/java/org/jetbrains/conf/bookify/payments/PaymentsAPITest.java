@@ -3,9 +3,12 @@ package org.jetbrains.conf.bookify.payments;
 import org.jetbrains.conf.bookify.DbConfiguration;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.http.HttpStatus;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.web.servlet.assertj.MockMvcTester;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -15,12 +18,16 @@ import java.util.UUID;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest
+@AutoConfigureMockMvc
 @Import(DbConfiguration.class)
 @ActiveProfiles("test")
 class PaymentsAPITest {
 
     @Autowired
     private PaymentsAPI paymentsAPI;
+
+    @Autowired
+    private MockMvcTester mockMvc;
 
     @Autowired
     private BookFineRateRepository fineRateRepository;
@@ -58,5 +65,16 @@ class PaymentsAPITest {
         Optional<BigDecimal> result = paymentsAPI.getApplicableRate(BOOK_WITH_RATE_HISTORY, LocalDate.of(2024, 12, 31));
 
         assertThat(result).contains(new BigDecimal("1.00"));
+    }
+
+    @Test
+    void getApplicableRate_returnsHistoricalRateOverHttp() {
+        var result = mockMvc.get()
+                .uri("/api/payments/fine-rate?bookId=" + BOOK_WITH_RATE_HISTORY + "&date=2024-07-15");
+
+        assertThat(result)
+                .hasStatus(HttpStatus.OK)
+                .bodyText()
+                .isEqualTo("0.75");
     }
 }
