@@ -1,3 +1,8 @@
+# Hibernate query capture and replay: rate effective on a fixed date
+###
+GET http://localhost:8081/api/payments/fine-rate?
+    bookId=a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11&date=2024-07-15
+
 # 1. Query with many parameters: UUIDs, a timestamp and an enum
 # John Doe borrows The Lord of the Rings.
 ###
