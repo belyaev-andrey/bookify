@@ -136,7 +136,7 @@ class BorrowingService {
         // Step 5: A book handed back after the loan period hands its overdue period to the
         // payments module (via event), which prices it against the book's fine rate.
         long overdueDays = calculateOverdueDays(savedBorrowing);
-        if (overdueDays < 0) {
+        if (overdueDays > 0) {
             eventPublisher.publishEvent(new AssignFineEvent(bookId, memberId, (int) overdueDays));
         }
 
