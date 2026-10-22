@@ -34,6 +34,8 @@ interface BorrowingRepository extends ListCrudRepository<Borrowing, UUID> {
      * @param excludedStatus the status that does not represent an active borrowing
      * @return a list of active borrowings for the member
      */
+    // @EntityGraph(attributePaths = {"requestedBook", "book", "member"},
+    //         type = EntityGraph.EntityGraphType.LOAD)
     List<Borrowing> findByMemberIdAndReturnDateIsNullAndStatusNot(UUID memberId, BorrowingStatus excludedStatus);
 
     /**
