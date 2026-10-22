@@ -1,5 +1,6 @@
 package org.jetbrains.conf.bookify.members;
 
+// import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.repository.CrudRepository;
 
 import java.time.LocalDateTime;
@@ -26,6 +27,8 @@ interface BorrowingRepository extends CrudRepository<Borrowing, UUID> {
      * @param excludedStatus the status that does not represent an active borrowing
      * @return a list of active borrowings for the member
      */
+    // @EntityGraph(attributePaths = {"requestedBook", "book", "member"},
+    //         type = EntityGraph.EntityGraphType.LOAD)
     List<Borrowing> findByMemberIdAndReturnDateIsNullAndStatusNot(UUID memberId, BorrowingStatus excludedStatus);
 
     /**
